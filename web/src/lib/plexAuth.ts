@@ -2,7 +2,7 @@ import { randomUUID } from "./uuid";
 
 const PLEX_TV_BASE_URL = "https://plex.tv";
 const PLEX_AUTH_BASE_URL = "https://app.plex.tv/auth#?";
-const PLEX_PRODUCT = "Silo";
+const PLEX_PRODUCT = "Quillo";
 const PLEX_VERSION = "1.0.0";
 const PLEX_CLIENT_ID_STORAGE_KEY = "silo-plex-history-import-client-id";
 

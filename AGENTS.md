@@ -1,3 +1,14 @@
+# Quillo (fork of Silo Server)
+
+This repository is **Quillo**, a fork of Silo. Read [FORK_NOTES.md](FORK_NOTES.md) first. Quillo's
+own scope adds on-demand Stremio-style addon catalogs and streams, served to the unmodified Silo
+apps. That work is in scope here despite the upstream non-goals below, which describe what Silo
+upstream accepts. Keep fork changes in their own packages, keep the DB and API compatible with
+stock Silo, and log every edit to Silo's own code in FORK_NOTES.md. Never open pull requests or
+issues against the Silo-Server organization for Quillo work.
+
+The rest of this file is upstream Silo's guide and still applies to the shared code.
+
 # Silo Server
 
 Go backend for Silo: API contracts, auth/session, catalog/scanner/playback services, database

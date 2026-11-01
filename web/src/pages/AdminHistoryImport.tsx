@@ -576,7 +576,7 @@ function TokenDialog({
               <p className="text-muted-foreground text-sm">
                 {isPlex
                   ? "Paste your Plex auth token directly."
-                  : "This key is used to discover users on the server and import their watch history into Silo."}
+                  : "This key is used to discover users on the server and import their watch history into Quillo."}
               </p>
               <div className="space-y-1.5">
                 <Label htmlFor="admin-token">API key / Token</Label>
@@ -825,7 +825,7 @@ function DiscoverDialog({
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs">Silo user</Label>
+                      <Label className="text-xs">Quillo user</Label>
                       <Select
                         value={userId}
                         onValueChange={(v) => {
@@ -1148,7 +1148,7 @@ function MappingsSection({
                 <TableHead className="hidden sm:table-cell">
                   <ArrowRight className="h-3.5 w-3.5" />
                 </TableHead>
-                <TableHead>Silo user</TableHead>
+                <TableHead>Quillo user</TableHead>
 
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
@@ -1532,7 +1532,7 @@ function AdminHistoryImportPage() {
     <div className="space-y-8 pb-4 sm:pb-6">
       <PageHeader
         title="History Import"
-        subtitle="Import watch history from external servers into Silo user profiles."
+        subtitle="Import watch history from external servers into Quillo user profiles."
       />
 
       {/* Source selector */}

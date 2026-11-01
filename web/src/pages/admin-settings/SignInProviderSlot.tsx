@@ -316,8 +316,8 @@ function useBindingSwitch({
       title={`Turn off ${label}?`}
       description={
         localLoginOn
-          ? `People who sign in with ${label} can't sign in until it's back on. Their Silo accounts, and the connections to ${label}, stay.`
-          : `Password sign-in is off, so only break-glass admins can sign in until ${label} is back on. Silo accounts, and their connections to ${label}, stay.`
+          ? `People who sign in with ${label} can't sign in until it's back on. Their Quillo accounts, and the connections to ${label}, stay.`
+          : `Password sign-in is off, so only break-glass admins can sign in until ${label} is back on. Quillo accounts, and their connections to ${label}, stay.`
       }
       confirmLabel="Turn off"
       variant="destructive"
@@ -325,7 +325,7 @@ function useBindingSwitch({
         write(
           false,
           localLoginOn
-            ? `${label} is off. Only Silo passwords sign in now.`
+            ? `${label} is off. Only Quillo passwords sign in now.`
             : `${label} is off. Password sign-in is off too, so only break-glass admins can sign in now.`,
         )
       }
@@ -486,7 +486,7 @@ function ProviderPanel({
       label="Create accounts on first sign-in"
       htmlFor={autoProvisionId}
       dirty={autoProvision !== savedAutoProvision(installation)}
-      description="People the provider lets in get a Silo account the first time they sign in. Off: only people whose Silo account is already connected can sign in."
+      description="People the provider lets in get a Quillo account the first time they sign in. Off: only people whose Quillo account is already connected can sign in."
       descriptionId={autoProvisionDescription}
     >
       <Switch
@@ -502,8 +502,8 @@ function ProviderPanel({
   if (mode === "oauth") {
     steps.push({
       key: "register",
-      title: "Register Silo at your provider",
-      description: "Create a confidential client for Silo and add this redirect URI to it.",
+      title: "Register Quillo at your provider",
+      description: "Create a confidential client for Quillo and add this redirect URI to it.",
       body: (
         <>
           {!publicUrlSet ? (
@@ -945,7 +945,7 @@ export function SignInProviderSlot({
         state: providerState(installation, missingSignInSetup(layout)),
       };
     }),
-    { id: "none", title: "None", detail: "Only Silo passwords." },
+    { id: "none", title: "None", detail: "Only Quillo passwords." },
   ];
 
   return (

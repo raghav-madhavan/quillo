@@ -474,7 +474,7 @@ export default function CompatibilityProxiesSettings() {
             />
             <SettingField
               label="Web player install folder"
-              description="The default is the folder Silo manages."
+              description="The default is the folder Quillo manages."
               value={form.getValue("jellyfin_compat.web_install_dir")}
               onChange={(v) => form.setValue("jellyfin_compat.web_install_dir", v)}
               restartRequired={restartKeys.has("jellyfin_compat.web_install_dir")}

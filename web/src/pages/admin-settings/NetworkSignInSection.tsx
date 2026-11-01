@@ -124,7 +124,7 @@ function NetworkSignInRow({ installation }: { installation: PluginInstallation }
             write(
               { auto_provision: checked },
               checked
-                ? `New ${label} users get a Silo account at first sign-in.`
+                ? `New ${label} users get a Quillo account at first sign-in.`
                 : `Only accounts already connected to ${label} can sign in.`,
             )
           }

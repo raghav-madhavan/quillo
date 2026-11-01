@@ -1,193 +1,61 @@
 <p align="center">
-  <img src="assets/icon.png" alt="Silo logo" width="112" height="112">
+  <img src="assets/icon.png" alt="Quillo logo" width="112" height="112">
 </p>
 
-<h1 align="center">Silo</h1>
+<h1 align="center">Quillo</h1>
 
 <p align="center">
-  A self-hosted media server for films, series, audiobooks, ebooks, podcasts, and manga.
-</p>
-
-<p align="center">
-  <a href="https://github.com/Silo-Server/silo-server/releases"><img alt="Latest GitHub release" src="https://img.shields.io/github/v/release/Silo-Server/silo-server?include_prereleases&amp;sort=semver&amp;display_name=tag&amp;style=flat-square&amp;label=release"></a>
-  <a href="https://github.com/orgs/Silo-Server/packages/container/package/silo-server"><img alt="Container image on GHCR" src="https://img.shields.io/badge/container-GHCR-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white"></a>
-  <a href="https://github.com/Silo-Server/silo-server/actions/workflows/ci.yml"><img alt="Continuous integration" src="https://img.shields.io/github/actions/workflow/status/Silo-Server/silo-server/ci.yml?branch=main&amp;style=flat-square&amp;label=CI"></a>
-  <img alt="Go 1.26" src="https://img.shields.io/badge/Go-1.26-00ADD8?style=flat-square&amp;logo=go&amp;logoColor=white">
-  <img alt="React 19" src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&amp;logo=react&amp;logoColor=white">
-  <a href="LICENSE"><img alt="AGPL-3.0-or-later license" src="https://img.shields.io/badge/license-AGPL--3.0--or--later-555555?style=flat-square"></a>
-</p>
-
-<p align="center">
-  <a href="#quick-start">Quick start</a>
-  · <a href="https://siloserver.org/docs">Documentation</a>
-  · <a href="docs/release-versioning.md">Builds &amp; releases</a>
-  · <a href="https://discord.gg/siloserver">Discord</a>
-  · <a href="#supporting-silo">Support Silo</a>
-  · <a href="CONTRIBUTING.md">Contributing</a>
+  A self-hosted media server for Apple devices, based on Silo.
 </p>
 
 ---
 
-> [!WARNING]
-> Silo is pre-release. APIs, configuration, and database migrations may change
-> before the first stable release. Back up your deployment before updating.
+Quillo is a fork of [Silo](https://github.com/Silo-Server/silo-server). It keeps Silo's
+database and API, so it is compatible with Silo apps and an existing Silo install can switch to it
+by changing one image line. Quillo is not made, endorsed, or supported by the Silo project or
+Silo Media L.L.C.
 
-## 1.0 release scope
-
-The [1.0 milestone](https://siloserver.org/milestone/1.0/) covers movies and
-series. Audiobooks, ebooks, and Audiobookshelf compatibility keep working as
-they do today and are labeled **beta**: they are outside the 1.0 support
-promise and will be replaced by a consolidated Books effort with no assigned
-release date. The broader capabilities below include those beta
-implementations, not a promise that every media type is supported in 1.0.
-Existing library data is preserved when upgrading.
-
-## What Silo does
-
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <strong>Play</strong><br><br>
-      Direct play when possible, remux when needed, transcode otherwise, with
-      VA-API, Quick Sync, and NVENC hardware acceleration.
-    </td>
-    <td width="33%" valign="top">
-      <strong>Organize</strong><br><br>
-      One catalog for films, series, audiobooks, ebooks, podcasts, and manga,
-      matched through metadata plugins such as TMDB and TVDB.
-    </td>
-    <td width="33%" valign="top">
-      <strong>Connect</strong><br><br>
-      Use the included web app, or the Jellyfin/Emby-compatible API with clients
-      such as <a href="https://vidhub.okaapps.com/what-does-vidhub-do/">VidHub</a>,
-      <a href="https://github.com/jarnedemeulemeester/findroid">Findroid</a>, and
-      <a href="https://firecore.com/infuse">Infuse</a>. Client coverage varies.
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" valign="top">
-      <strong>Share</strong><br><br>
-      Household profiles with their own watch state, library access, and
-      parental controls.
-    </td>
-    <td width="33%" valign="top">
-      <strong>Manage</strong><br><br>
-      Libraries, users, providers, storage, search, and playback are configured
-      in the admin interface, not in config files.
-    </td>
-    <td width="33%" valign="top">
-      <strong>Scale</strong><br><br>
-      Start with one integrated server; split proxy and transcode roles across
-      shared PostgreSQL and Redis when you need to.
-    </td>
-  </tr>
-</table>
+What Quillo adds is listed in [FORK_NOTES.md](FORK_NOTES.md). Everything else works as Silo
+documents it at <https://siloserver.org/docs>.
 
 ## Quick start
 
-Requires Docker Compose 2.24 or newer. The default Compose file runs the
-omnibus image: Silo with a bundled PostgreSQL (with pgvector) and Redis, plus
-Meilisearch when you turn it on.
+Quillo images are built on the machine that runs them, for its own CPU (an ARM VPS gets ARM
+images). Commands assume the repository root is the cwd.
 
-```sh
-git clone https://github.com/Silo-Server/silo-server.git
-cd silo-server
-cp .env.example .env
-chmod 600 .env
-key="$(openssl rand -base64 48)" && printf '\nSECRET_KEY=%s\n' "$key" >> .env
-```
+1. Install Docker, then build the images:
 
-Set `MEDIA_ROOT` in `.env` to the absolute path of your media, then:
+   ```sh
+   scripts/quillo-build-image.sh
+   ```
 
-```sh
-docker compose up -d
-```
+2. Create `.env` next to `docker-compose.yml`:
 
-Open <http://localhost:8090> and complete onboarding.
+   ```sh
+   echo "SECRET_KEY=$(openssl rand -base64 48)" > .env
+   echo "MEDIA_ROOT=/path/to/your/media" >> .env
+   ```
 
-Hardware transcoding (VA-API or NVIDIA) and access for proxy or transcode
-nodes on other hosts are commented out in `docker-compose.yml`; uncomment the
-lines you need.
+   Back up `SECRET_KEY` separately; without it, stored credentials can't be decrypted.
 
-### Updating an install from before the omnibus image
+3. Start it and open `http://<server>:8090` to create the admin account:
 
-An install that runs Silo, PostgreSQL, and Redis in separate containers keeps
-that layout when its `.env` sets `COMPOSE_FILE=docker-compose.advanced.yml`; set
-it before updating. `docker-compose.yml` is an example of a new install and
-does not look for an earlier one: started on that data folder, it replaces
-the old `silo` container and comes up on a new, empty database with setup
-open, while the earlier PostgreSQL and Redis keep running with their data
-untouched. Moving into the single container is a separate step. The separate GPU and node Compose files are gone, so a `COMPOSE_FILE`
-that names one fails until it names only the deployment file you use, with
-the matching lines in it uncommented. See [Moving from the multi-container
-stack](docs/architecture/omnibus-image.md#moving-from-the-multi-container-stack).
+   ```sh
+   docker compose up -d
+   ```
 
-The [user manual](https://siloserver.org/docs) covers the rest, starting with
-[installation](https://siloserver.org/docs/install): backing up `SECRET_KEY`,
-storage, GPU acceleration, Meilisearch, external PostgreSQL and Redis,
-transcode nodes, PostgreSQL tuning, backups, and updates.
+### Switching from Silo
 
-## Builds and releases
+In your existing Compose file, change the Silo image to `quillo:latest` (one container) or
+`quillo:base` (separate PostgreSQL and Redis containers), then `docker compose up -d`. Data,
+users, and watch history stay as they are. To go back, change the image line back.
 
-Until the first release, default-branch images carry an ordered `build-N` tag
-and the full commit SHA alongside `latest`. Build numbers order published images;
-they are not release versions. [Release versioning](docs/release-versioning.md)
-defines each tag and the SemVer contract.
+## License
 
-## Documentation
+Quillo is free software under the GNU Affero General Public License v3.0 or later, with the
+Platform Library Exception in [PLATFORM-EXCEPTION.md](PLATFORM-EXCEPTION.md), the same terms as
+Silo. If you run a modified Quillo for other people, you must offer them its source code. See
+[LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-- [User manual](https://siloserver.org/docs) — installing, configuring, and running Silo
-- [Development guide](DEVELOPMENT.md) — source setup, builds, tests, migrations
-- [Settings API](docs/settings-api.md), [Downloads API](docs/downloads-api.md), and [Apple Push Display Token](docs/notifications-push-api.md) — client contracts
-
-## Community and contributions
-
-Questions and discussion: [Discord](https://discord.gg/siloserver).
-Bugs, install problems, and performance issues: the
-[GitHub issue forms](https://github.com/Silo-Server/silo-server/issues/new/choose),
-which ask for reproduction steps and raw logs.
-
-Native clients are developed in
-[`silo-apple`](https://github.com/Silo-Server/silo-apple) and
-[`silo-android`](https://github.com/Silo-Server/silo-android). Client-visible
-API, authentication, playback, or metadata changes should consider both.
-
-Right now, the most helpful way to contribute is a clear, accurate issue. We
-implement and review changes through our own workflow, and pull request volume
-has outgrown what we can review carefully, so a good issue usually helps us
-more than a pull request.
-
-Pull requests are still welcome from contributors who've had one merged in a
-Silo repository, or when a maintainer asks for one. We close other pull
-requests without review. [CONTRIBUTING.md](CONTRIBUTING.md) explains what makes
-an issue useful.
-
-## Supporting Silo
-
-Silo is developed in spare time and funded out of pocket, and will stay free and
-open source. [GitHub Sponsors](https://github.com/sponsors/quick104) covers AI
-development tooling (Claude, Codex), push-notification relay infrastructure, and
-future project costs. Bug reports, code, and documentation help just as much.
-
-Code review is supported by [Macroscope](https://macroscope.com) through its
-open source program.
-
-<p>
-  <a href="https://macroscope.com">
-    <img alt="Sponsored by Macroscope" src="assets/macroscope-banner.png" width="400">
-  </a>
-</p>
-
-## License and trademarks
-
-Silo's source code is licensed under the
-**GNU Affero General Public License v3.0 or later** (`AGPL-3.0-or-later`), with
-an additional permission to combine it with platform SDKs such as the Windows
-App SDK. See [LICENSE](LICENSE) and [PLATFORM-EXCEPTION.md](PLATFORM-EXCEPTION.md).
-
-The **Silo name, logo, and wordmark are trademarks of Silo Media L.L.C.** and
-are not covered by the AGPL. Forks and redistributions may use the code but must
-not use the Silo brand as their identity and must remove or replace the brand
-assets. Publishing a Silo-branded app to an app store requires written
-permission. See [TRADEMARK.md](TRADEMARK.md) for permitted referential use,
-including phrases such as "compatible with Silo."
+"Silo" is a trademark of Silo Media L.L.C. and is used here only to describe what Quillo is
+based on and compatible with. See [TRADEMARK.md](TRADEMARK.md).

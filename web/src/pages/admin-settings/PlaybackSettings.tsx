@@ -335,7 +335,7 @@ export default function PlaybackSettings() {
           <SettingField
             label="Video transcoding"
             type="toggle"
-            description="Off never re-encodes video. Silo still repackages files and converts audio for devices that need it."
+            description="Off never re-encodes video. Quillo still repackages files and converts audio for devices that need it."
             value={form.getValue("playback.transcode_enabled")}
             onChange={(v) => form.setValue("playback.transcode_enabled", v)}
             restartRequired={restartKeys.has("playback.transcode_enabled")}
@@ -508,7 +508,7 @@ export default function PlaybackSettings() {
             <SettingField
               label="Complete playlists for copied video"
               type="toggle"
-              description="Experimental. When Silo copies a file's video, list every segment from the start, using the file's keyframes, instead of a playlist that grows as Silo copies. Stops Safari freezing partway through. A seek ahead of what Silo has copied waits for it to get there."
+              description="Experimental. When Quillo copies a file's video, list every segment from the start, using the file's keyframes, instead of a playlist that grows as Quillo copies. Stops Safari freezing partway through. A seek ahead of what Quillo has copied waits for it to get there."
               value={form.getValue("playback.copy_keyframe_playlist") || "false"}
               onChange={(v) => form.setValue("playback.copy_keyframe_playlist", v)}
               restartRequired={restartKeys.has("playback.copy_keyframe_playlist")}
@@ -581,7 +581,7 @@ export default function PlaybackSettings() {
           <SettingField
             label="Chapter thumbnail workers"
             type="number"
-            description="How many files Silo extracts chapter thumbnails from at once. One more worker takes only titles that are playing, so they aren't stuck behind the queue."
+            description="How many files Quillo extracts chapter thumbnails from at once. One more worker takes only titles that are playing, so they aren't stuck behind the queue."
             value={form.getValue("playback.chapter_thumbnail_workers")}
             onChange={(v) => form.setValue("playback.chapter_thumbnail_workers", v)}
             restartRequired={restartKeys.has("playback.chapter_thumbnail_workers")}
@@ -737,7 +737,7 @@ export default function PlaybackSettings() {
               description={
                 onlineMarkersEnabled
                   ? markerMode === "both"
-                    ? "Check online first when playback starts. Silo detects only the intro or credits online providers don't have, using this server's CPU."
+                    ? "Check online first when playback starts. Quillo detects only the intro or credits online providers don't have, using this server's CPU."
                     : "Check online for missing or outdated markers when playback starts."
                   : "Detect missing markers when playback starts. Local analysis uses CPU."
               }
@@ -751,7 +751,7 @@ export default function PlaybackSettings() {
             <SettingField
               label="Detection workers"
               type="number"
-              description="How many seasons or movies Silo analyzes at once, each with its own ffmpeg process. Defaults to 1. Raise it to finish a large library sooner if your storage and CPU have room."
+              description="How many seasons or movies Quillo analyzes at once, each with its own ffmpeg process. Defaults to 1. Raise it to finish a large library sooner if your storage and CPU have room."
               value={form.getValue("markers.detection_workers")}
               onChange={(value) => form.setValue("markers.detection_workers", value)}
               restartRequired={restartKeys.has("markers.detection_workers")}

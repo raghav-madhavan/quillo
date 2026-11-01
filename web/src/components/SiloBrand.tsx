@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 import { useBranding } from "@/hooks/useBranding";
 
 /** White-text wordmark; Silo only paints dark surfaces. */
-const SILO_WORDMARK_SRC = "/silo-wordmark-sidebar.png";
-const SILO_MARK_SRC = "/silo-icon-1024.png";
+const SILO_WORDMARK_SRC = "/quillo-wordmark-sidebar.png";
+const SILO_MARK_SRC = "/quillo-icon-1024.png";
 
 export type SiloBrandVariant = "wordmark" | "mark";
 

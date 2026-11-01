@@ -45,7 +45,7 @@ export function DeleteRowDialog({
           <DialogTitle>Delete {rowTitle}?</DialogTitle>
           <DialogDescription>
             {description ??
-              `The row goes away from ${pageLabel} for everyone. If Silo made a collection just for this row, it removes that collection too when nothing else uses it.`}
+              `The row goes away from ${pageLabel} for everyone. If Quillo made a collection just for this row, it removes that collection too when nothing else uses it.`}
           </DialogDescription>
         </DialogHeader>
         {conflict ? (

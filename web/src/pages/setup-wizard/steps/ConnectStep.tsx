@@ -22,7 +22,7 @@ export function ConnectStep() {
   return (
     <StepFrame
       title="Connect apps"
-      lede="Silo's own apps for iOS, Android, and TV work out of the box. It can also answer to apps built for Jellyfin."
+      lede="Quillo's own apps for iOS, Android, and TV work out of the box. It can also answer to apps built for Jellyfin."
       onSubmit={handleSubmit}
       busy={busy}
       onSkip={skip}
@@ -30,7 +30,7 @@ export function ConnectStep() {
     >
       <StepSection
         title="Jellyfin-compatible apps"
-        caption="Infuse, Findroid, VidHub, Swiftfin, and others sign in and play through Silo's compatibility API."
+        caption="Infuse, Findroid, VidHub, Swiftfin, and others sign in and play through Quillo's compatibility API."
       >
         <SettingField
           label="Answer Jellyfin apps"

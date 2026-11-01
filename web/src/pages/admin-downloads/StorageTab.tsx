@@ -146,7 +146,7 @@ export default function StorageTab({
               {formatStorageBytes(totals.untracked)}
             </span>
           }
-          detail="not in Silo's records"
+          detail="not in Quillo's records"
         />
         <StatTile
           label="Freed, 30 days"
@@ -201,7 +201,7 @@ export default function StorageTab({
         title={untrackedTarget ? `Delete untracked files on ${untrackedTarget.name}?` : ""}
         description={
           untrackedTarget
-            ? `${formatStorageBytes(untrackedTarget.untracked_bytes)} in ${untrackedTarget.untracked_files} ${untrackedTarget.untracked_files === 1 ? "file" : "files"} at the last check. Silo lists the directory again first and only deletes files no prepared-file record accounts for and that nothing has written to for an hour.`
+            ? `${formatStorageBytes(untrackedTarget.untracked_bytes)} in ${untrackedTarget.untracked_files} ${untrackedTarget.untracked_files === 1 ? "file" : "files"} at the last check. Quillo lists the directory again first and only deletes files no prepared-file record accounts for and that nothing has written to for an hour.`
             : ""
         }
         confirmLabel="Delete untracked files"

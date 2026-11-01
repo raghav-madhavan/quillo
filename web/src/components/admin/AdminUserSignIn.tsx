@@ -155,9 +155,9 @@ function connectPasswordNote(
   user: AdminUser,
   installation: PluginInstallation | undefined,
 ): string {
-  if (user.break_glass) return " As a break-glass account it keeps its Silo password.";
+  if (user.break_glass) return " As a break-glass account it keeps its Quillo password.";
   if (installation && isNetworkSignIn(installation)) {
-    return user.password_login ? " It keeps its Silo password too." : "";
+    return user.password_login ? " It keeps its Quillo password too." : "";
   }
   return " Connecting turns off password sign-in for this account.";
 }
@@ -466,10 +466,10 @@ export function AdminUserSignIn({
         <Panel title="Password sign-in">
           <p className="text-sm">
             {!user.password_login
-              ? `Off: ${user.username} can't sign in with a Silo password.`
+              ? `Off: ${user.username} can't sign in with a Quillo password.`
               : passwordWaitsForServer
-                ? `On for this account, but password sign-in is off for the server, so ${user.username} can't sign in with a Silo password until it's back on.`
-                : `On: ${user.username} can sign in with a Silo password.`}
+                ? `On for this account, but password sign-in is off for the server, so ${user.username} can't sign in with a Quillo password until it's back on.`
+                : `On: ${user.username} can sign in with a Quillo password.`}
           </p>
           {passwordWaitsForServer ? (
             <p className="text-muted-foreground text-xs">

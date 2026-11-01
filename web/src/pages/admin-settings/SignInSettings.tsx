@@ -161,7 +161,7 @@ export default function SignInSettings() {
         ) : null}
 
         <FieldGroup
-          label="Silo passwords"
+          label="Quillo passwords"
           dirty={[LOCAL_LOGIN_KEY, ...PASSWORD_ACCOUNT_KEYS].some((key) => form.isDirty(key))}
           actions={
             <Link
@@ -257,7 +257,7 @@ export default function SignInSettings() {
               label="Match existing accounts by email"
               dirty={form.isDirty(EMAIL_MATCH_KEY)}
               type="toggle"
-              description="A first sign-in connects to the regular Silo account with the same email, when the provider says the email is verified. Admin, owner and break-glass accounts are never matched."
+              description="A first sign-in connects to the regular Quillo account with the same email, when the provider says the email is verified. Admin, owner and break-glass accounts are never matched."
               value={emailMatchOn ? "true" : "false"}
               onChange={(value) => form.setValue(EMAIL_MATCH_KEY, value)}
               status={

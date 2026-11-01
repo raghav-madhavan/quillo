@@ -107,7 +107,7 @@ export function PluginRepositoriesPanel({
           <h2 id="plugin-repositories-heading" className="text-[15px] font-semibold">
             Repositories
           </h2>
-          <p className="text-muted-foreground text-[13px]">Where Silo finds plugins.</p>
+          <p className="text-muted-foreground text-[13px]">Where Quillo finds plugins.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setShowForm(!showForm)}>
           {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
@@ -156,7 +156,7 @@ export function PluginRepositoriesPanel({
               />
               <span className="shrink-0 font-medium">{repo.display_name}</span>
               <span className="text-muted-foreground min-w-0 flex-1 truncate text-[12.5px]">
-                {repo.managed ? "Managed by Silo" : repo.url}
+                {repo.managed ? "Managed by Quillo" : repo.url}
               </span>
               {repo.managed ? null : (
                 <span className="flex shrink-0 gap-1">

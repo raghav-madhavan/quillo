@@ -311,7 +311,7 @@ function MenuSettings() {
   return (
     <SettingsGroup
       title="Menu"
-      description="The links along the top of Silo in your web browsers. Search and your profile are always there."
+      description="The links along the top of Quillo in your web browsers. Search and your profile are always there."
       actions={
         clientOverride ? (
           <ResetButton

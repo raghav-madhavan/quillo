@@ -362,7 +362,7 @@ export default function SubtitleAppearanceSettings() {
         />
       </SettingsGroup>
 
-      <SettingsGroup title="Subtitles" description="Which subtitles Silo picks for this profile.">
+      <SettingsGroup title="Subtitles" description="Which subtitles Quillo picks for this profile.">
         <SettingRow
           label="Subtitle language"
           description="Pick a subtitle language or leave subtitles off by default."

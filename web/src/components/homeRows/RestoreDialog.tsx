@@ -34,10 +34,10 @@ function listTitles(titles: string[]): string {
 }
 
 function rowsLine(rowCount: number, name: string): string {
-  if (rowCount === 0) return `${capitalize(name)} gets Silo's default rows.`;
+  if (rowCount === 0) return `${capitalize(name)} gets Quillo's default rows.`;
   return rowCount === 1
-    ? `The 1 row on ${name} is replaced by Silo's default rows.`
-    : `The ${rowCount} rows on ${name} are replaced by Silo's default rows.`;
+    ? `The 1 row on ${name} is replaced by Quillo's default rows.`
+    : `The ${rowCount} rows on ${name} are replaced by Quillo's default rows.`;
 }
 
 function collectionLine(titles: string[]): string | null {
@@ -66,7 +66,7 @@ function otherPagesLine(
 ): string | null {
   const others = otherLibraryLabels.join(", ");
   if (restoreAll) {
-    const restored = `also go back to Silo's default rows, and their collection rows are removed.`;
+    const restored = `also go back to Quillo's default rows, and their collection rows are removed.`;
     return page.kind === "home"
       ? `Library pages (${others}) ${restored}`
       : `The other library pages (${others}) ${restored} Home doesn't change.`;
@@ -208,7 +208,7 @@ export function RestoreDialog({
                 ? "Also restore every library page"
                 : "Also restore the other library pages"
             }
-            help={`${otherLibraryLabels.join(", ")} go back to Silo's default rows too.`}
+            help={`${otherLibraryLabels.join(", ")} go back to Quillo's default rows too.`}
             checked={all}
             disabled={busy}
             onCheckedChange={onRestoreAllChange}

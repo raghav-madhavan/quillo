@@ -1,0 +1,14 @@
+Quillo
+Copyright (C) 2026 Quillo contributors
+
+Quillo is based on Silo (https://github.com/Silo-Server/silo-server),
+Copyright (C) 2026 Silo Media L.L.C. and contributors, licensed under the GNU
+Affero General Public License v3.0 or later with the Platform Library
+Exception. Quillo is distributed under the same terms; see LICENSE and
+PLATFORM-EXCEPTION.md.
+
+Quillo is not affiliated with or endorsed by Silo Media L.L.C. "Silo" and the
+Silo logo are trademarks of Silo Media L.L.C. The Silo brand assets have been
+removed from this fork and replaced with Quillo's own; see TRADEMARK.md.
+
+Third-party components are listed in THIRD_PARTY_NOTICES.md.

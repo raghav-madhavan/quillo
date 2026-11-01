@@ -593,7 +593,7 @@ export default function WebhookSyncSettings() {
 
       <SettingsGroup
         title="Add a connection"
-        description="Create a provider-specific webhook endpoint and choose the default Silo profile."
+        description="Create a provider-specific webhook endpoint and choose the default Quillo profile."
       >
         <div className="flex flex-col gap-3">
           <Label className="text-sm font-medium">Provider</Label>
@@ -1081,7 +1081,7 @@ export default function WebhookSyncSettings() {
                                 items: [
                                   {
                                     event: "Users → Add to Favorites, Remove from Favorites",
-                                    note: "Syncs favorites to the mapped Silo profile.",
+                                    note: "Syncs favorites to the mapped Quillo profile.",
                                   },
                                   {
                                     event: "Users → Mark Played, Mark Unplayed",
@@ -1095,7 +1095,7 @@ export default function WebhookSyncSettings() {
                                 items: [
                                   {
                                     event: "Playback → Start, Pause, Unpause",
-                                    note: "Silo only records completion, not in-progress state.",
+                                    note: "Quillo only records completion, not in-progress state.",
                                   },
                                 ],
                               },

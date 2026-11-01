@@ -340,13 +340,13 @@ function RegisterRelayRow({
   const expirationValid = expiration != null && !Number.isNaN(expiration.getTime());
   const renewalStatus = expirationValid
     ? expiration.getTime() <= Date.now()
-      ? "Expired; Silo renews it before the next delivery."
-      : `Expires ${expiration.toLocaleString()}; Silo renews automatically.`
+      ? "Expired; Quillo renews it before the next delivery."
+      : `Expires ${expiration.toLocaleString()}; Quillo renews automatically.`
     : configured
-      ? "Expiration unknown; Silo refreshes the credential on its next renewal."
+      ? "Expiration unknown; Quillo refreshes the credential on its next renewal."
       : reregistrationRequired
         ? "No relay credential is registered."
-        : "Not registered yet; Silo registers on its first push.";
+        : "Not registered yet; Quillo registers on its first push.";
 
   const registerRelay = async () => {
     if (inFlight.current) return;
@@ -942,7 +942,7 @@ export default function NotificationsAdminSettings() {
           <ChannelCard
             icon={RadioTower}
             title="Silo Push Relay"
-            description="Mobile push through Silo's relay, delivered by APNs or FCM."
+            description="Mobile push through Quillo's relay, delivered by APNs or FCM."
             enabled={mobilePushOn}
             onEnabledChange={(enabled) => {
               form.setValue("notifications.apple_push_delivery_enabled", String(enabled));
@@ -1242,7 +1242,7 @@ export default function NotificationsAdminSettings() {
                 />
                 <SettingField
                   label="Mention the requester on Discord"
-                  description="Unlinked accounts show their Silo username instead."
+                  description="Unlinked accounts show their Quillo username instead."
                   type="toggle"
                   value={form.getValue("notifications.server_channels.mention_requesters")}
                   onChange={(v) =>
@@ -1258,7 +1258,7 @@ export default function NotificationsAdminSettings() {
         {/* ── Processing: everything here has a working default ── */}
         <FieldGroup
           label="Processing"
-          description="How Silo notices new content, groups it into messages, and how long it keeps them."
+          description="How Quillo notices new content, groups it into messages, and how long it keeps them."
           restartAll={allRestart(PROCESSING_KEYS)}
           dirty={anyDirty(PROCESSING_KEYS)}
         >
@@ -1334,7 +1334,7 @@ export default function NotificationsAdminSettings() {
               />
               <SettingField
                 label="Sent history"
-                description="Record of what Silo already notified about."
+                description="Record of what Quillo already notified about."
                 unit="days"
                 type="number"
                 value={numberValue("notifications.retention.event_days", "30")}

@@ -121,7 +121,7 @@ export default function AdminPluginDetail() {
     return (
       <PageUnavailable
         title="Couldn't load plugins"
-        description="Silo couldn't read the installed plugins. Try again in a moment."
+        description="Quillo couldn't read the installed plugins. Try again in a moment."
         onRetry={() => void installationsQuery.refetch()}
         retrying={installationsQuery.isFetching}
       >
@@ -137,7 +137,7 @@ export default function AdminPluginDetail() {
     return (
       <PageUnavailable
         title="Couldn't load the plugin catalog"
-        description="This plugin isn't installed, and Silo couldn't read the catalog to look it up."
+        description="This plugin isn't installed, and Quillo couldn't read the catalog to look it up."
         onRetry={() => void catalogQuery.refetch()}
         retrying={catalogQuery.isFetching}
       >
@@ -149,7 +149,7 @@ export default function AdminPluginDetail() {
   return (
     <PageUnavailable
       title="Plugin not found"
-      description="This plugin isn't installed and isn't in any catalog Silo can see."
+      description="This plugin isn't installed and isn't in any catalog Quillo can see."
     >
       <AllPluginsLink />
     </PageUnavailable>

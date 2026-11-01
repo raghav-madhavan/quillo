@@ -509,7 +509,7 @@ function ProviderPanel({
           custom
             ? "Any endpoint that speaks the OpenAI API."
             : type.type === "ollama" || type.type === "whisper"
-              ? "Use a host the Silo container can reach; localhost is Silo itself."
+              ? "Use a host the Quillo container can reach; localhost is Quillo itself."
               : "Change only for a proxy or gateway."
         }
         status={
@@ -612,7 +612,7 @@ function ProviderPanel({
           open={confirmDelete}
           onOpenChange={setConfirmDelete}
           title={`Remove ${provider.name}?`}
-          description="Silo discards the saved key. Connect the provider again to use it."
+          description="Quillo discards the saved key. Connect the provider again to use it."
           confirmLabel="Remove provider"
           variant="destructive"
           isPending={remove.isPending}

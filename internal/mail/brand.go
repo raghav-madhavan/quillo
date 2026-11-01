@@ -24,10 +24,10 @@ import (
 // reach the server, and uploaded logos are stored as WebP, which Outlook does
 // not render.
 
-// defaultWordmarkPNG is a copy of web/public/silo-wordmark-sidebar.png; keep
+// defaultWordmarkPNG is a copy of web/public/quillo-wordmark-sidebar.png; keep
 // the two in step when the Silo wordmark changes.
 //
-//go:embed assets/silo-wordmark.png
+//go:embed assets/quillo-wordmark.png
 var defaultWordmarkPNG []byte
 
 const (

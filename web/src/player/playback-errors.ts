@@ -38,13 +38,13 @@ export function describePlanTerminal(terminal: TerminalV3): PlaybackPolicyErrorD
       return {
         title: "This file can't be played",
         message:
-          "Silo couldn't read this file. It appears to be empty or damaged. Replace the file, then rescan the library.",
+          "Quillo couldn't read this file. It appears to be empty or damaged. Replace the file, then rescan the library.",
       };
     case "source_metadata_incomplete":
       return {
         title: "This file hasn't finished scanning",
         message:
-          "Silo doesn't know enough about this file yet to plan playback. Try again once the scan finishes.",
+          "Quillo doesn't know enough about this file yet to plan playback. Try again once the scan finishes.",
       };
     case "client_hls_unsupported":
       return {
@@ -57,7 +57,7 @@ export function describePlanTerminal(terminal: TerminalV3): PlaybackPolicyErrorD
       return {
         title: "No playable version found",
         message:
-          "Silo couldn't find a way to play this file on this device. Try another version if one is available.",
+          "Quillo couldn't find a way to play this file on this device. Try another version if one is available.",
       };
     case "no_alternate_version":
       return {
@@ -67,7 +67,7 @@ export function describePlanTerminal(terminal: TerminalV3): PlaybackPolicyErrorD
         // missing message.
         message:
           terminal.message?.trim() ||
-          "Silo couldn't find a way to play this file on this device. Try another version if one is available.",
+          "Quillo couldn't find a way to play this file on this device. Try another version if one is available.",
       };
     case "hdr_transcode_unsupported":
     case "dv_conversion_unsupported":
@@ -80,7 +80,7 @@ export function describePlanTerminal(terminal: TerminalV3): PlaybackPolicyErrorD
     case "audio_conversion_unsupported":
       return {
         title: "This file can't be converted",
-        message: "Silo can't convert this file into something this device can play.",
+        message: "Quillo can't convert this file into something this device can play.",
       };
     case "conversion_tool_unavailable":
     case "transcode_node_unavailable":
@@ -124,12 +124,12 @@ export function describePlanTerminal(terminal: TerminalV3): PlaybackPolicyErrorD
         // unsupported); the generic sentence only covers a missing message.
         message:
           terminal.message?.trim() ||
-          "Silo couldn't prepare the selected subtitles for this device. Try a different track.",
+          "Quillo couldn't prepare the selected subtitles for this device. Try a different track.",
       };
     default:
       return {
         title: "Playback unavailable",
-        message: terminal.message?.trim() || "Silo could not start playback.",
+        message: terminal.message?.trim() || "Quillo could not start playback.",
       };
   }
 }
@@ -141,7 +141,7 @@ export function describePlanTerminal(terminal: TerminalV3): PlaybackPolicyErrorD
 export const CONNECTION_LOST_ERROR: PlaybackPolicyErrorDescription = {
   title: "Connection lost",
   message:
-    "Silo lost its connection to the server and couldn't reconnect. Check your connection, then try again to continue where you left off.",
+    "Quillo lost its connection to the server and couldn't reconnect. Check your connection, then try again to continue where you left off.",
 };
 
 /**
@@ -204,8 +204,8 @@ export function describePlaybackTransportError(
       title: "Playback unavailable",
       message:
         phase === "start"
-          ? "Silo could not start playback right now. Please try again."
-          : "Silo could not update playback right now. Please try again.",
+          ? "Quillo could not start playback right now. Please try again."
+          : "Quillo could not update playback right now. Please try again.",
     };
   }
 

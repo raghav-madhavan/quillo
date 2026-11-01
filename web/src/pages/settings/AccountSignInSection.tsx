@@ -46,7 +46,7 @@ const LINK_RETURN_PATH = "/settings/account";
 type Banner = { kind: "success"; text: string } | { kind: "error"; text: string };
 
 const NO_LOCAL_PASSWORD =
-  "Your account has no Silo password to confirm this with. Ask an admin to connect the provider for you.";
+  "Your account has no Quillo password to confirm this with. Ask an admin to connect the provider for you.";
 
 /** Readable text for a failed connect, by the problem the server answered. */
 function connectErrorText(error: unknown, provider: AuthProviderOption): string {
@@ -67,7 +67,7 @@ function connectErrorText(error: unknown, provider: AuthProviderOption): string 
         return `${provider.display_name} didn't accept that username and password.`;
       }
       if (location === "body.password") {
-        return "That isn't your current Silo password.";
+        return "That isn't your current Quillo password.";
       }
       break;
     case "local_password_required":
@@ -101,12 +101,12 @@ function connectIntro(provider: AuthProviderOption): string {
   if (provider.mode === "network") {
     const owner = networkIdentityName(provider);
     const account = owner ? `${owner}'s ${name} account` : `the ${name} account`;
-    return `Confirm your Silo password to connect ${account} on this device.`;
+    return `Confirm your Quillo password to connect ${account} on this device.`;
   }
   if (provider.mode === "credentials") {
-    return `Confirm your Silo password, then enter your ${name} username and password.`;
+    return `Confirm your Quillo password, then enter your ${name} username and password.`;
   }
-  return `Confirm your Silo password, then sign in at ${name}.`;
+  return `Confirm your Quillo password, then sign in at ${name}.`;
 }
 
 /** Reads the result a web linking flow came back with, once. */
@@ -378,7 +378,7 @@ function ConnectForm({
         </p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-password`}>Silo password</Label>
+        <Label htmlFor={`${idPrefix}-password`}>Quillo password</Label>
         <PasswordInput
           id={`${idPrefix}-password`}
           autoComplete="current-password"
@@ -456,7 +456,7 @@ function DisconnectDialog({
     } catch (failure) {
       if (failure instanceof V2ProblemError && failure.problemType === "last_sign_in_method") {
         setError(
-          `${name} is the only way to sign in to your account, so it can't be disconnected. Ask an admin to set a Silo password for you first.`,
+          `${name} is the only way to sign in to your account, so it can't be disconnected. Ask an admin to set a Quillo password for you first.`,
         );
       } else if (failure instanceof V2ProblemError && failure.status === 404) {
         // Already gone; the list refreshes.
