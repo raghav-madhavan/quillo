@@ -31,6 +31,7 @@ func DetectMultiplePPSH264(ctx context.Context, ffmpegPath, filePath string) (bo
 	if strings.TrimSpace(ffmpegPath) == "" {
 		return false, fmt.Errorf("ffmpeg path not configured")
 	}
+	filePath = probeInput(ctx, filePath) // Quillo: quillo_probe.go
 	// -bsf:v filter_units=pass_types=8 keeps only PPS NAL units (type 8); the
 	// Annex-B h264 muxer emits them start-code delimited on stdout.
 	cmd := fspath.CommandContext(ctx, ffmpegPath,

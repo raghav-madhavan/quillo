@@ -455,6 +455,13 @@ func newChiRouter(deps Dependencies) chi.Router {
 	declareNativeMediaRoutes()
 	r := chi.NewRouter()
 
+	// Quillo: the addon service (FORK_NOTES.md), built first because the
+	// catalog and playback wiring below hand it their file repository.
+	var quilloAddons *addons.Service
+	if deps.DB != nil {
+		quilloAddons = addons.NewService(deps.DB)
+	}
+
 	if deps.TMDB == nil {
 		tmdbAPIKey := ""
 		if deps.Config != nil {
@@ -946,6 +953,10 @@ func newChiRouter(deps Dependencies) chi.Router {
 		var fileFetcher catalog.FileVersionFetcher
 		if deps.FileRepo != nil {
 			fileFetcher = deps.FileRepo
+			// Quillo: addon streams appear as versions (FORK_NOTES.md).
+			if quilloAddons != nil {
+				fileFetcher = quilloAddons.StreamFiles(deps.FileRepo)
+			}
 		}
 
 		seasonRepo = catalog.NewSeasonRepository(deps.DB)
@@ -1526,6 +1537,9 @@ func newChiRouter(deps Dependencies) chi.Router {
 		}
 		if deps.FileRepo != nil {
 			playbackHandler.FileVersionFetcher = deps.FileRepo
+			if quilloAddons != nil { // Quillo: addon streams as alternate versions
+				playbackHandler.FileVersionFetcher = quilloAddons.StreamFiles(deps.FileRepo)
+			}
 		}
 		if subtitleRepo != nil {
 			playbackHandler.SubtitleRepo = subtitleRepo
@@ -3203,8 +3217,8 @@ func newChiRouter(deps Dependencies) chi.Router {
 	r.Handle("/api/v2/*", apiv2.NewHandler(v2deps))
 
 	// Quillo: addon manager API, outside Silo's /api/v2 contract (FORK_NOTES.md).
-	if deps.DB != nil && authMiddleware != nil {
-		addonService := addons.NewService(deps.DB)
+	if quilloAddons != nil && authMiddleware != nil {
+		addonService := quilloAddons
 		if refresher, ok := deps.MetadataService.(addons.ItemRefresher); ok {
 			addonService.SetRefresher(refresher)
 		}

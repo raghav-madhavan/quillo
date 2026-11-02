@@ -128,6 +128,7 @@ func probeFileWithin(ctx context.Context, ffprobePath string, filePath string, l
 }
 
 func probeMediaFile(ctx context.Context, ffprobePath string, filePath string, limits probeLimits, readFrameSideData bool) (*ProbeData, error) {
+	filePath = probeInput(ctx, filePath) // Quillo: quillo_probe.go
 	probeCtx, cancel := context.WithTimeout(ctx, limits.probe)
 	defer cancel()
 	// Errors go to stderr (kept on the *exec.ExitError) so IsProbeRejection

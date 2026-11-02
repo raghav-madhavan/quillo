@@ -115,6 +115,31 @@ Not done yet: cleanup of Quillo-made items nobody has used for a while, handing 
 over to Silo when a local file for it appears (it stays dated 2000 and in Streaming), and
 per-profile addons.
 
+## Phase 4b: addon streams as versions
+
+- When Silo reads a movie's or episode's files (detail page versions, playback start, alternate
+  versions), `addons.StreamFiles` wraps Silo's file repository and first asks every enabled
+  stream addon for the title (`movie/tt…` or `series/tt…:S:E`), in parallel, for at most 10
+  seconds. Only `http(s)` url streams are used; torrent, YouTube and external-link streams are
+  skipped. Results are ranked (resolution, then addon order, then the addon's own order), the best
+  12 kept, and each saved as a `media_files` row in the Streaming library with a placeholder path
+  `/quillo-stream/<hash>/<label>.<ext>`. `quillo_streams` holds the real URL and any request
+  headers; it is never returned by the API. A title's streams are asked for again after 30 minutes
+  (`quillo_stream_sets`).
+- Labels: the version name is built from the addon's text, e.g. "2160p DV · 61.2 GB · Torrentio".
+- Probing: every stream is probed over HTTP in parallel (6 at a time) with Silo's own `ffprobe`
+  wrapper, so playback plans it like a scanned file; the viewer waits up to 12 seconds. A stream
+  whose probe fails (dead link, not media) is marked missing and never offered. Streams that need
+  request headers can't be probed yet.
+- Playback: the apps play original files with their own engine, so most streams go through
+  `original_http`: the server proxies byte ranges from the URL (`playback/quillo_remote.go`); the
+  client only ever talks to Quillo. Remux hands the URL to ffmpeg. Nothing is transcoded by Quillo
+  itself. A link that fails mid-stream answers 502.
+- Local files and addon streams for the same title are versions of one item; Silo's normal
+  version choice decides the default (currently by quality, so an addon 1080p can beat a local
+  720p).
+- Dev tool: `scripts/quillo-test-addon` serves generated clips for a few IMDb ids and one dead link.
+
 ## Core touchpoints
 
 Edits to Silo's own files beyond the rebrand. Keep each one small.
@@ -134,5 +159,12 @@ Edits to Silo's own files beyond the rebrand. Keep each one small.
 | `cmd/silo/main.go` | The metadata service's image-cache job queue is wrapped by `addons.HotlinkAddonArtwork` |
 | `internal/api/router.go` | Passes the metadata service to the addon service as its `ItemRefresher` |
 
+| `internal/playback/quillo_remote.go` (new) + `internal/playback/directplay.go`, `internal/playback/remux.go` | `RegisterRemoteSourceResolver`; direct play proxies a remote source, remux reads its URL |
+| `internal/api/handlers/playback_missing.go` | Playback preflight skips the on-disk check for remote sources (it would mark them missing) |
+| `internal/scanner/quillo_probe.go` (new) + `internal/scanner/probe.go`, `internal/scanner/pps.go` | `ApplyProbe`, `RegisterProbeURLResolver`; probes and the copy-safety scan read a remote file's URL |
+| `internal/api/router.go` | The addon service is created first; the detail service and playback handler get `StreamFiles` instead of the bare file repository |
+
 Known test failure on macOS, also on upstream: `internal/scanner`
 `TestExternalSubtitleDirCacheReadsSubtitleFolders` expects a case-sensitive filesystem.
+`internal/playback` `TestInvalidateHWProbeCacheSupersedesAnInFlightProbe` is timing-sensitive and
+can fail under a loaded full-package run; it passes on its own.

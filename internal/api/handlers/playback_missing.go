@@ -102,6 +102,9 @@ func preflightPlaybackFile(
 	if file.MissingSince != nil {
 		return &playbackFilePreflightError{notFound: true}
 	}
+	if playback.IsRemoteSource(ctx, file.FilePath) { // Quillo: no file on disk to check
+		return nil
+	}
 
 	if _, err := fspath.StatContext(ctx, file.FilePath); err != nil {
 		if os.IsNotExist(err) {

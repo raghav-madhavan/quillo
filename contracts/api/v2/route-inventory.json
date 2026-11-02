@@ -3799,7 +3799,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -3829,7 +3829,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -3859,7 +3859,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -3889,7 +3889,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -3919,7 +3919,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -3949,7 +3949,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -3979,7 +3979,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",
@@ -4009,7 +4009,7 @@
         "authenticated"
       ],
       "conditions": [
-        "deps.DB != nil && authMiddleware != nil"
+        "quilloAddons != nil && authMiddleware != nil"
       ],
       "conditional": true,
       "request_kind": "unknown",

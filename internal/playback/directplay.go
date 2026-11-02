@@ -88,6 +88,13 @@ func MediaMIMETypes() []string {
 // Range requests, conditional requests (including If-Match, If-Range, and
 // If-None-Match), and Content-Type detection.
 func ServeDirectPlay(w http.ResponseWriter, r *http.Request, filePath string) error {
+	// Quillo: remote sources (quillo_remote.go).
+	if src, ok, err := resolveRemoteSource(r.Context(), filePath); err != nil {
+		http.Error(w, "stream unavailable", http.StatusBadGateway)
+		return err
+	} else if ok {
+		return serveRemoteDirectPlay(w, r, src, MimeFromExtension(filePath))
+	}
 	// Media bodies routinely take longer than the server's absolute
 	// WriteTimeout; roll the write deadline with progress instead.
 	streamWriter := httpstream.NewRollingDeadlineWriter(w)

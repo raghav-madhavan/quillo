@@ -565,10 +565,16 @@ func ServeRemuxWithOptions(w http.ResponseWriter, r *http.Request, filePath, out
 	// deadline with progress instead of the server's absolute WriteTimeout.
 	streamWriter := httpstream.NewRollingDeadlineWriter(w)
 	w = streamWriter
-	// Check file exists before starting ffmpeg to return a proper 404.
-	// Headers must be written before streaming begins, so we can't detect
-	// ffmpeg errors after WriteHeader(200) has been sent.
-	if _, err := fspath.Stat(filePath); err != nil {
+	// Quillo: ffmpeg reads a remote source's URL directly (quillo_remote.go).
+	if src, ok, err := resolveRemoteSource(r.Context(), filePath); err != nil {
+		http.Error(w, "stream unavailable", http.StatusBadGateway)
+		return err
+	} else if ok {
+		filePath = src.URL
+	} else if _, err := fspath.Stat(filePath); err != nil {
+		// Check file exists before starting ffmpeg to return a proper 404.
+		// Headers must be written before streaming begins, so we can't detect
+		// ffmpeg errors after WriteHeader(200) has been sent.
 		if os.IsNotExist(err) {
 			http.Error(w, "file not found", http.StatusNotFound)
 			return err

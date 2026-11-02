@@ -9,6 +9,8 @@ import (
 
 	"github.com/Silo-Server/silo-server/internal/api/handlers"
 	"github.com/Silo-Server/silo-server/internal/catalog"
+	"github.com/Silo-Server/silo-server/internal/playback"
+	"github.com/Silo-Server/silo-server/internal/scanner"
 	"github.com/Silo-Server/silo-server/internal/sections"
 )
 
@@ -25,6 +27,10 @@ type Service struct {
 	refresher        ItemRefresher
 	enrichWake       chan struct{}
 	streamingLibrary int
+
+	files   *scanner.FileRepository
+	streams *streamSet
+	remote  *remoteSources
 }
 
 // NewService builds the service and registers the addon home-row type and
@@ -42,6 +48,14 @@ func NewService(db *pgxpool.Pool) *Service {
 
 		enrichWake: make(chan struct{}, 1),
 	}
+	s.files = scanner.NewFileRepository(db)
+	s.streams = &streamSet{fresh: map[string]time.Time{}, inflight: map[string]chan struct{}{}}
+	s.remote = &remoteSources{s: s, cache: map[string]playback.RemoteSource{}}
+	playback.RegisterRemoteSourceResolver(s.remote.resolve)
+	scanner.RegisterProbeURLResolver(func(ctx context.Context, filePath string) (string, bool) {
+		src, ok, err := s.remote.resolve(ctx, filePath)
+		return src.URL, ok && err == nil && len(src.Headers) == 0
+	})
 	s.catalogs.onNewItems = s.nudgeEnrich
 	// Registered before any scan can run, so scans never touch it.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

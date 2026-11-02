@@ -93,3 +93,4 @@ output/
 /playbackfixtures
 /quillo
 .quillo-dev/
+/scripts/quillo-test-addon/media/
