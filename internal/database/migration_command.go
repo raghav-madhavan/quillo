@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/Silo-Server/silo-server/internal/addons"
 	"github.com/Silo-Server/silo-server/internal/partman"
 )
 
@@ -17,6 +18,10 @@ import (
 // Migration errors are returned unchanged; index errors include operation context.
 func MigrateOnly(ctx context.Context, pool *pgxpool.Pool, fsys fs.FS, dir string) error {
 	if err := RunMigrations(ctx, pool, fsys, dir); err != nil {
+		return err
+	}
+	// Quillo: the addon manager's own migration set (FORK_NOTES.md).
+	if err := addons.Migrate(ctx, pool); err != nil {
 		return err
 	}
 	// Parent audit indexes need concurrent builds on existing partitions.

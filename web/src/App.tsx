@@ -106,6 +106,8 @@ const AdminRequests = lazy(() => import("@/pages/AdminRequests"));
 const AdminDevices = lazy(() => import("@/pages/AdminDevices"));
 const AdminLibraries = lazy(() => import("@/pages/AdminLibraries"));
 const AdminAutoscan = lazy(() => import("@/pages/AdminAutoscan"));
+// Quillo: addon manager (FORK_NOTES.md).
+const AdminAddons = lazy(() => import("@/quillo/AdminAddons"));
 const AdminAutoscanActivity = lazy(() => import("@/pages/AdminAutoscanActivity"));
 const AdminSettingsLayout = lazy(() => import("@/pages/admin-settings/AdminSettingsLayout"));
 const AdminNodes = lazy(() => import("@/pages/AdminNodes"));
@@ -500,6 +502,7 @@ function AppRoutes() {
                   </Route>
                   <Route path="requests" element={<AdminRequests />} />
                   <Route path="requests/discover" element={<AdminRequestDiscover />} />
+                  <Route path="addons" element={<AdminAddons />} />
                   <Route path="autoscan" element={<AdminAutoscan />} />
                   <Route path="autoscan/activity" element={<AdminAutoscanActivity />} />
                   <Route path="history" element={<AdminPlaybackHistory />} />

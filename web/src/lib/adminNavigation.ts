@@ -108,6 +108,14 @@ const PAGES = {
     icon: Library,
     href: "/admin/libraries",
   },
+  // Quillo: addon manager (FORK_NOTES.md).
+  addons: {
+    label: "Addons",
+    description: "Stremio-style addons that add catalogs and streams.",
+    keywords: ["addons", "stremio", "aiostreams", "manifest", "catalogs", "streams"],
+    icon: Blocks,
+    href: "/admin/addons",
+  },
   autoscanSources: {
     label: "Sources",
     description: "What Autoscan watches for changes: folders, webhooks, and servers.",
@@ -360,6 +368,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
           settingsPage("library", "Settings"),
         ],
       },
+      PAGES.addons,
       {
         id: "autoscan",
         label: "Autoscan",

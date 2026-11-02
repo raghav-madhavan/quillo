@@ -21,6 +21,7 @@ import (
 
 	"github.com/Silo-Server/silo-server/internal/access"
 	"github.com/Silo-Server/silo-server/internal/activitylog"
+	"github.com/Silo-Server/silo-server/internal/addons"
 	"github.com/Silo-Server/silo-server/internal/adminjob"
 	"github.com/Silo-Server/silo-server/internal/ai/chatgpt"
 	"github.com/Silo-Server/silo-server/internal/ai/jobrunner"
@@ -3200,6 +3201,24 @@ func newChiRouter(deps Dependencies) chi.Router {
 	}
 	v2deps.ObserveRoutes = deps.v2RouteSnapshot
 	r.Handle("/api/v2/*", apiv2.NewHandler(v2deps))
+
+	// Quillo: addon manager API, outside Silo's /api/v2 contract (FORK_NOTES.md).
+	if deps.DB != nil && authMiddleware != nil {
+		addonService := addons.NewService(deps.DB)
+		go addonService.EnsureStarter(context.Background())
+		addonHandler := addons.NewHandler(addonService)
+		r.Route("/api/quillo/admin", func(r chi.Router) {
+			r.Use(authMiddleware.RequireAuth, requireActingAdmin)
+			r.Get("/addons", addonHandler.List)
+			r.Post("/addons", addonHandler.Install)
+			r.Post("/addons/preview", addonHandler.Preview)
+			r.Get("/addons/presets", addonHandler.Presets)
+			r.Put("/addons/order", addonHandler.Reorder)
+			r.Patch("/addons/{id}", addonHandler.Update)
+			r.Post("/addons/{id}/refresh", addonHandler.Refresh)
+			r.Delete("/addons/{id}", addonHandler.Remove)
+		})
+	}
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", healthHandler.ServeHTTP)

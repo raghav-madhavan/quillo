@@ -49,6 +49,8 @@ const SETTINGS_TITLES: Record<string, string> = {
 
 const ADMIN_TITLES: Record<string, string> = {
   "access-groups": "Admin Access Groups",
+  // Quillo: addon manager (FORK_NOTES.md).
+  addons: "Admin Addons",
   activity: "Admin Activity",
   "api-keys": "Admin API Keys",
   autoscan: "Admin Autoscan",

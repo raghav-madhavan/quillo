@@ -38,7 +38,7 @@
       "id": "api",
       "entrypoint": "internal/api.NewRouter",
       "description": "Main Silo API listener: the /api/v1 namespace and the routes mounted beside it.",
-      "route_count": 704
+      "route_count": 712
     },
     {
       "id": "api_v2",
@@ -60,8 +60,8 @@
     }
   ],
   "totals": {
-    "routes": 889,
-    "conditional_routes": 692,
+    "routes": 897,
+    "conditional_routes": 700,
     "streaming_routes": 45,
     "websocket_routes": 4
   },
@@ -3781,6 +3781,246 @@
       "success_statuses": null,
       "error_codes": null,
       "source_file": "cmd/silo/root_handler.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "GET",
+      "path": "/api/quillo/admin/addons",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).List",
+      "handler_expr": "addonHandler.List",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "POST",
+      "path": "/api/quillo/admin/addons",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Install",
+      "handler_expr": "addonHandler.Install",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "PUT",
+      "path": "/api/quillo/admin/addons/order",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Reorder",
+      "handler_expr": "addonHandler.Reorder",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "GET",
+      "path": "/api/quillo/admin/addons/presets",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Presets",
+      "handler_expr": "addonHandler.Presets",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "POST",
+      "path": "/api/quillo/admin/addons/preview",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Preview",
+      "handler_expr": "addonHandler.Preview",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "DELETE",
+      "path": "/api/quillo/admin/addons/{id}",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Remove",
+      "handler_expr": "addonHandler.Remove",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "PATCH",
+      "path": "/api/quillo/admin/addons/{id}",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Update",
+      "handler_expr": "addonHandler.Update",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "POST",
+      "path": "/api/quillo/admin/addons/{id}/refresh",
+      "route_group": "/api/quillo/admin",
+      "handler": "(*internal/addons.Handler).Refresh",
+      "handler_expr": "addonHandler.Refresh",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 15,
+      "auth_class": "acting_admin",
+      "auth_traits": [
+        "acting_admin",
+        "authenticated"
+      ],
+      "conditions": [
+        "deps.DB != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
     },
     {
       "listener": "api",

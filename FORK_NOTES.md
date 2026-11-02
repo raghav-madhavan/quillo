@@ -48,6 +48,34 @@ Not rebranded yet: server-side (Go) messages and email templates that say "Silo"
 docs under `docs/`. Code identifiers (`SiloBrand`, package paths) are left alone to keep merges
 small.
 
+## Phase 2: addon manager
+
+Quillo's own code:
+
+- `internal/addons/` — manifest parsing and validation, the addon HTTP client, the
+  `quillo_addons` store, the starter preset (Cinemeta, installed once on a fresh server), and the
+  admin API handlers.
+- `internal/addons/migrations/` — Quillo's migration set. It runs after Silo's, records versions in
+  `quillo_goose_db_version`, and uses its own advisory lock, so it never collides with Silo's
+  `migrations/sql`.
+- `web/src/quillo/` — the Admin › Addons page and its API client.
+- `scripts/quillo-route-inventory.sh` — regenerates `contracts/api/v2/route-inventory.json` in a
+  Linux container (the generator needs linux/cgo).
+
+Admin API (`/api/quillo/admin`, login + acting-admin required, outside Silo's `/api/v2` contract):
+`GET/POST /addons`, `POST /addons/preview`, `GET /addons/presets`, `PUT /addons/order`,
+`PATCH/DELETE /addons/{id}`, `POST /addons/{id}/refresh`. Errors use Silo's
+`{"error", "message"}` envelope with a plain-English message.
+
 ## Core touchpoints
 
-None yet beyond the rebrand above. Phases 2–4 add entries here.
+Edits to Silo's own files beyond the rebrand. Keep each one small.
+
+| File | Change |
+|---|---|
+| `internal/database/migration_command.go` | `MigrateOnly` runs `addons.Migrate` after Silo's migrations |
+| `internal/api/router.go` | Registers the `/api/quillo/admin` routes behind `RequireAuth` + `requireActingAdmin`, and starts the one-time starter preset |
+| `contracts/api/v2/route-inventory.json` | Regenerated to list the Quillo routes |
+| `web/src/App.tsx` | `/admin/addons` route |
+| `web/src/lib/adminNavigation.ts` | Addons entry in Admin › Manage |
+| `web/src/lib/documentTitle.ts` | "Admin Addons" title |
