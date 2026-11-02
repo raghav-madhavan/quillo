@@ -459,7 +459,7 @@ func newChiRouter(deps Dependencies) chi.Router {
 	// catalog and playback wiring below hand it their file repository.
 	var quilloAddons *addons.Service
 	if deps.DB != nil {
-		quilloAddons = addons.NewService(deps.DB)
+		quilloAddons = addons.Shared(deps.DB)
 	}
 
 	if deps.TMDB == nil {
@@ -978,7 +978,8 @@ func newChiRouter(deps Dependencies) chi.Router {
 		detailSvc.SetGroupClaimRepository(groupClaimRepo)
 		detailSvc.SetWorkSummaryProvider(literaryRepo)
 		detailSvc.SetLiteraryWorkLinker(literaryService)
-		detailSvc.SetProbeEnsurer(deps.ProbeEnsurer)
+		// Quillo: listing versions must not open addon stream links (FORK_NOTES.md).
+		detailSvc.SetProbeEnsurer(addons.BrowseProbeEnsurer(deps.ProbeEnsurer))
 		detailSvc.SetChapterThumbnailQueuer(deps.ChapterThumbnailQueuer)
 		if deps.TrickplayReader != nil {
 			detailSvc.SetTrickplayAvailability(deps.TrickplayReader)
@@ -3224,6 +3225,10 @@ func newChiRouter(deps Dependencies) chi.Router {
 		}
 		go addonService.Start(context.Background())
 		addonHandler := addons.NewHandler(addonService)
+		// This server's own ffmpeg reads addon streams here; the handler
+		// checks a per-process token and a loopback client instead of a login.
+		r.Get("/api/quillo/internal/stream/{token}/{hash}", addonHandler.InternalStream)
+		r.Head("/api/quillo/internal/stream/{token}/{hash}", addonHandler.InternalStream)
 		r.Route("/api/quillo/admin", func(r chi.Router) {
 			r.Use(authMiddleware.RequireAuth, requireActingAdmin)
 			r.Get("/addons", addonHandler.List)

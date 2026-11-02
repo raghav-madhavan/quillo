@@ -25,6 +25,7 @@ const DefaultWaitDelay = 5 * time.Second
 // ends, kills its whole process tree. WaitDelay is DefaultWaitDelay; callers
 // may change it. Callers must not replace SysProcAttr or Cancel.
 func CommandContext(ctx context.Context, name string, args ...string) *exec.Cmd {
+	args = rewriteArgs(ctx, args)                  // Quillo: quillo_args.go
 	cmd := exec.CommandContext(ctx, name, args...) //nolint:gosec // G204: callers pass the configured ffmpeg or ffprobe path.
 	cmd.SysProcAttr = sysProcAttr()
 	cmd.Cancel = func() error { return Kill(cmd) }

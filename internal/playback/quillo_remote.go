@@ -15,8 +15,8 @@ import (
 // Quillo: media files whose bytes live at a remote URL, such as addon streams
 // (FORK_NOTES.md). A registered resolver maps such a file's path to the URL
 // and the request headers it needs; direct play then proxies byte ranges
-// from it, and remux hands the URL to ffmpeg. The client only ever talks to
-// this server, as the Silo apps require.
+// from it. ffmpeg and ffprobe reach it through procgroup's argument rewrite.
+// The client only ever talks to this server, as the Silo apps require.
 
 // RemoteSource is where a remote media file's bytes are.
 type RemoteSource struct {
@@ -28,10 +28,22 @@ type RemoteSource struct {
 // ok=false for an ordinary local file.
 type RemoteSourceResolver func(ctx context.Context, filePath string) (src RemoteSource, ok bool, err error)
 
+// RemoteFailureReporter is told when a remote source answered with an error,
+// so its owner can stop offering it.
+type RemoteFailureReporter func(ctx context.Context, filePath string, status int)
+
 var (
 	remoteMu       sync.RWMutex
 	remoteResolver RemoteSourceResolver
+	remoteFailed   RemoteFailureReporter
 )
+
+// RegisterRemoteFailureReporter installs the callback for failing sources.
+func RegisterRemoteFailureReporter(f RemoteFailureReporter) {
+	remoteMu.Lock()
+	defer remoteMu.Unlock()
+	remoteFailed = f
+}
 
 // RegisterRemoteSourceResolver installs the resolver used by direct play and
 // remux.
@@ -76,8 +88,9 @@ var remoteRequestHeaders = []string{"Range", "If-Range", "If-Match", "If-None-Ma
 // remoteResponseHeaders are copied back to the client.
 var remoteResponseHeaders = []string{"Content-Range", "Content-Length", "Accept-Ranges", "ETag", "Last-Modified"}
 
-// serveRemoteDirectPlay proxies a direct-play request to a remote source.
-func serveRemoteDirectPlay(w http.ResponseWriter, r *http.Request, src RemoteSource, contentType string) error {
+// ServeRemoteSource proxies a byte-range request for the media file at
+// filePath to its remote source.
+func ServeRemoteSource(w http.ResponseWriter, r *http.Request, filePath string, src RemoteSource, contentType string) error {
 	req, err := http.NewRequestWithContext(r.Context(), r.Method, src.URL, nil)
 	if err != nil {
 		http.Error(w, "stream unavailable", http.StatusBadGateway)
@@ -107,6 +120,12 @@ func serveRemoteDirectPlay(w http.ResponseWriter, r *http.Request, src RemoteSou
 	default:
 		// A dead link (404, 403, an expired token) is a gateway failure, so
 		// the client replans instead of treating the media as broken.
+		remoteMu.RLock()
+		report := remoteFailed
+		remoteMu.RUnlock()
+		if report != nil && resp.StatusCode >= 400 {
+			report(context.WithoutCancel(r.Context()), filePath, resp.StatusCode)
+		}
 		http.Error(w, "stream unavailable", http.StatusBadGateway)
 		return errors.New("remote source answered " + resp.Status)
 	}

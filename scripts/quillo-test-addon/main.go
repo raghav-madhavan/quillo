@@ -32,6 +32,11 @@ var streams = map[string][]map[string]any{
 		{"name": "TestAddon\n1080p", "title": "Dexter.Resurrection.S01E01.1080p.WEB.x265.mkv", "url": base + "/media/test-1080p-hevc.mkv"},
 		{"name": "TestAddon\n720p", "title": "Dexter.Resurrection.S01E01.720p.WEB.h264.mp4", "url": base + "/media/test-720p-h264.mp4"},
 	},
+	// Dexter: Resurrection S01E02, with DTS audio the phone can't decode, so
+	// playback goes through a server remux.
+	"series/tt33043892:1:2": {
+		{"name": "[RD+] TestAddon\n1080p", "title": "Dexter.Resurrection.S01E02.1080p.WEB.h264.DTS.mkv", "url": base + "/media/test-1080p-h264-dts.mkv"},
+	},
 	// A dead link, to test falling back to the next stream.
 	"movie/tt0111161": {
 		{"name": "TestAddon\n2160p", "title": "Dead.Link.2160p.mkv", "url": base + "/media/missing.mkv"},

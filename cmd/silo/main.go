@@ -3918,7 +3918,8 @@ func main() {
 
 			var fileFetcher catalog.FileVersionFetcher
 			if deps.FileRepo != nil {
-				fileFetcher = deps.FileRepo
+				// Quillo: addon streams as versions here too (FORK_NOTES.md).
+				fileFetcher = addons.Shared(deps.DB).StreamFiles(deps.FileRepo)
 			}
 
 			detailSvc := newCompatDetailService(&deps, itemRepo, episodeRepo, seasonRepo, personRepo, fileFetcher, userStoreProvider)

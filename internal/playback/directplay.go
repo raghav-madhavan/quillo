@@ -93,7 +93,7 @@ func ServeDirectPlay(w http.ResponseWriter, r *http.Request, filePath string) er
 		http.Error(w, "stream unavailable", http.StatusBadGateway)
 		return err
 	} else if ok {
-		return serveRemoteDirectPlay(w, r, src, MimeFromExtension(filePath))
+		return ServeRemoteSource(w, r, filePath, src, MimeFromExtension(filePath))
 	}
 	// Media bodies routinely take longer than the server's absolute
 	// WriteTimeout; roll the write deadline with progress instead.

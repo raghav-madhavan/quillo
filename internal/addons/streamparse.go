@@ -38,18 +38,27 @@ type StreamInfo struct {
 	Size       int64  // bytes, 0 when unknown
 	Filename   string
 	Source     string // the addon's own name line, e.g. "Torrentio"
+	// Cache is 1 when the addon marks the stream as ready on a debrid
+	// service (it plays at once), -1 when it marks it as not yet downloaded
+	// (opening it starts a download), and 0 when it says neither.
+	Cache int
 }
 
 var (
-	reRes    = regexp.MustCompile(`(?i)\b(2160p|4k|uhd|1440p|1080p|720p|576p|480p)\b`)
-	reDV     = regexp.MustCompile(`(?i)\b(dv|dovi|dolby[ ._-]?vision)\b`)
-	reHDR10  = regexp.MustCompile(`(?i)\bhdr10\+|\bhdr10plus\b`)
-	reHDR    = regexp.MustCompile(`(?i)\bhdr(10)?\b`)
-	reHEVC   = regexp.MustCompile(`(?i)\b(hevc|x265|h[ .]?265)\b`)
-	reAV1    = regexp.MustCompile(`(?i)\bav1\b`)
-	reAVC    = regexp.MustCompile(`(?i)\b(avc|x264|h[ .]?264)\b`)
-	reSize   = regexp.MustCompile(`(?i)(\d+(?:[.,]\d+)?)\s*(TB|GB|GiB|MB|MiB)\b`)
-	videoExt = map[string]bool{".mkv": true, ".mp4": true, ".m4v": true, ".mov": true, ".avi": true, ".ts": true, ".m2ts": true, ".webm": true}
+	reRes   = regexp.MustCompile(`(?i)\b(2160p|4k|uhd|1440p|1080p|720p|576p|480p)\b`)
+	reDV    = regexp.MustCompile(`(?i)\b(dv|dovi|dolby[ ._-]?vision)\b`)
+	reHDR10 = regexp.MustCompile(`(?i)\bhdr10\+|\bhdr10plus\b`)
+	reHDR   = regexp.MustCompile(`(?i)\bhdr(10)?\b`)
+	reHEVC  = regexp.MustCompile(`(?i)\b(hevc|x265|h[ .]?265)\b`)
+	reAV1   = regexp.MustCompile(`(?i)\bav1\b`)
+	reAVC   = regexp.MustCompile(`(?i)\b(avc|x264|h[ .]?264)\b`)
+	reSize  = regexp.MustCompile(`(?i)(\d+(?:[.,]\d+)?)\s*(TB|GB|GiB|MB|MiB)\b`)
+	// Cached on a debrid service: Torrentio "[RD+]", Comet "[RD⚡]",
+	// AIOStreams and MediaFusion "⚡". Not yet: "[RD download]", Comet
+	// "[RD⬇️]", "⏳", and MediaFusion's "[❌]".
+	reCached   = regexp.MustCompile(`(?i)\[(RD|AD|PM|DL|TB|OC|ED|EN|PKP|TRB)\+\]|⚡`)
+	reUncached = regexp.MustCompile(`(?i)\[(RD|AD|PM|DL|TB|OC|ED|EN|PKP|TRB) download\]|⏳|❌|⬇`)
+	videoExt   = map[string]bool{".mkv": true, ".mp4": true, ".m4v": true, ".mov": true, ".avi": true, ".ts": true, ".m2ts": true, ".webm": true}
 )
 
 func normalizeResolution(s string) string {
@@ -112,6 +121,13 @@ func ParseStream(st Stream) StreamInfo {
 			v *= 1 << 20
 		}
 		info.Size = int64(v)
+	}
+	label := st.Name + "\n" + st.Title + "\n" + st.Description
+	switch {
+	case reCached.MatchString(label):
+		info.Cache = 1
+	case reUncached.MatchString(label):
+		info.Cache = -1
 	}
 	info.Filename = streamFilename(st)
 	if first, _, _ := strings.Cut(strings.TrimSpace(st.Name), "\n"); first != "" {

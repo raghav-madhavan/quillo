@@ -8,8 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os/exec"
-	"path"
 	"slices"
 	"strings"
 	"sync"
@@ -19,7 +17,6 @@ import (
 
 	"github.com/Silo-Server/silo-server/internal/models"
 	"github.com/Silo-Server/silo-server/internal/playback"
-	"github.com/Silo-Server/silo-server/internal/scanner"
 )
 
 const (
@@ -30,10 +27,6 @@ const (
 	streamSetFresh = 30 * time.Minute
 	// Streams kept per title, best first.
 	maxStreamsPerTitle = 12
-	// Probes run this many at a time; the viewer waits for them up to
-	// probeDeadline.
-	probeParallel = 6
-	probeDeadline = 12 * time.Second
 	// How long a detail page or playback start waits for addons at most.
 	streamsDeadline = 10 * time.Second
 )
@@ -140,11 +133,15 @@ type rankedStream struct {
 	info     StreamInfo
 }
 
-// rankStreams orders streams best first: higher resolution, then the
+// rankStreams orders streams best first: ready on a debrid service before
+// unmarked before still to download, then higher resolution, then the
 // addon's position on the Addons page, then the addon's own order (addons
-// like AIOStreams already sort by cache status and quality).
+// like AIOStreams already sort by quality and preference).
 func rankStreams(rs []rankedStream) {
 	slices.SortStableFunc(rs, func(a, b rankedStream) int {
+		if d := b.info.Cache - a.info.Cache; d != 0 {
+			return d
+		}
 		if d := resolutionRank(b.info.Resolution) - resolutionRank(a.info.Resolution); d != 0 {
 			return d
 		}
@@ -164,7 +161,7 @@ type streamSet struct {
 
 // EnsureStreams makes a title's addon streams available as versions:
 // fetched from every stream addon in parallel, ranked, saved as media files
-// in the Streaming library, and the best few probed. It waits at most
+// in the Streaming library. It waits at most
 // streamsDeadline; addons that answer later are skipped this time.
 func (s *Service) EnsureStreams(ctx context.Context, ref *titleRef) {
 	if ref == nil || s.streamingLibrary == 0 {
@@ -216,33 +213,11 @@ func (s *Service) EnsureStreams(ctx context.Context, ref *titleRef) {
 	if len(files) == 0 {
 		return
 	}
-	// Probe every stream now, in parallel, so playback can plan them and dead
-	// links are hidden before anyone picks one. Probes still running at the
-	// deadline finish in the background.
-	n := len(files)
-	probeCtx, cancelProbes := context.WithTimeout(context.WithoutCancel(ctx), 2*time.Minute)
-	all := make(chan struct{})
-	go func() {
-		defer cancelProbes()
-		defer close(all)
-		var wg sync.WaitGroup
-		sem := make(chan struct{}, probeParallel)
-		for _, f := range files[:n] {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				sem <- struct{}{}
-				defer func() { <-sem }()
-				s.probeStream(probeCtx, f)
-			}()
-		}
-		wg.Wait()
-	}()
-	select {
-	case <-all:
-	case <-time.After(probeDeadline):
-	case <-ctx.Done():
-	}
+	// Streams are not opened here: a debrid "resolve" link asks the service
+	// to fetch the torrent, so opening every link would add torrents the
+	// viewer never picked. Silo probes the one that plays, at playback start,
+	// through procgroup's placeholder rewrite.
+	_ = files
 }
 
 func (s *Service) markFresh(key string, at time.Time) {
@@ -363,53 +338,6 @@ func (s *Service) saveStreams(ctx context.Context, ref *titleRef, ranked []ranke
 		return nil, err
 	}
 	return files, nil
-}
-
-// probeStream reads a stream's container, tracks and duration over HTTP and
-// saves them, so playback can plan it like a scanned file.
-func (s *Service) probeStream(ctx context.Context, mf *models.MediaFile) {
-	src, ok, err := s.remote.resolve(ctx, mf.FilePath)
-	if err != nil || !ok || len(src.Headers) > 0 {
-		return // ffprobe can't send the headers an addon asked for
-	}
-	var done bool
-	_ = s.store.db.QueryRow(ctx, `SELECT probed_at IS NOT NULL FROM quillo_streams WHERE file_path = $1`, mf.FilePath).Scan(&done)
-	if done {
-		return
-	}
-	ffprobe, err := exec.LookPath("ffprobe")
-	if err != nil {
-		return
-	}
-	probe, err := scanner.ProbeFile(ctx, ffprobe, src.URL)
-	if err != nil {
-		_, _ = s.store.db.Exec(ctx, `UPDATE quillo_streams SET probe_error = $2 WHERE file_path = $1`, mf.FilePath, truncate(err.Error(), 500))
-		if ctx.Err() == nil {
-			// The link answered with an error or isn't media: hide it, so
-			// playback never picks a stream that can't play. A later lookup
-			// shows it again if the addon still offers it.
-			_, _ = s.store.db.Exec(ctx, `UPDATE media_files SET missing_since = now() WHERE file_path = $1 AND missing_since IS NULL`, mf.FilePath)
-		}
-		slog.InfoContext(ctx, "quillo streams: probe failed; hiding the stream", "file", path.Base(mf.FilePath), "error", err)
-		return
-	}
-	probed := *mf
-	scanner.ApplyProbe(&probed, probe)
-	if probed.FileSize == 0 {
-		probed.FileSize = mf.FileSize
-	}
-	if _, err := s.files.Upsert(ctx, probed); err != nil {
-		slog.WarnContext(ctx, "quillo streams: saving probe", "error", err)
-		return
-	}
-	_, _ = s.store.db.Exec(ctx, `UPDATE quillo_streams SET probed_at = now(), probe_error = NULL WHERE file_path = $1`, mf.FilePath)
-}
-
-func truncate(s string, n int) string {
-	if len(s) > n {
-		return s[:n]
-	}
-	return s
 }
 
 // remoteSources resolves placeholder paths to stream URLs for playback,

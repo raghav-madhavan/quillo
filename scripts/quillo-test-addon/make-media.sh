@@ -11,4 +11,6 @@ ffmpeg -loglevel error -y -f lavfi -i testsrc2=size=1920x1080:rate=24 -f lavfi -
   -t 60 -c:v libx265 -preset ultrafast -tag:v hvc1 -pix_fmt yuv420p -c:a aac -b:a 128k "$dir/test-1080p-hevc.mkv"
 ffmpeg -loglevel error -y -f lavfi -i testsrc2=size=1280x720:rate=24 -f lavfi -i sine=frequency=440:sample_rate=48000 \
   -t 90 -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart "$dir/test-720p-h264.mp4"
+ffmpeg -loglevel error -y -f lavfi -i testsrc2=size=1920x1080:rate=24 -f lavfi -i sine=frequency=550:sample_rate=48000 \
+  -t 120 -c:v libx264 -preset veryfast -g 48 -pix_fmt yuv420p -c:a dca -strict -2 -ac 2 -b:a 768k "$dir/test-1080p-h264-dts.mkv"
 echo "Test clips written to $dir"

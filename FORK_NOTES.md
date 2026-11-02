@@ -127,14 +127,28 @@ per-profile addons.
   headers; it is never returned by the API. A title's streams are asked for again after 30 minutes
   (`quillo_stream_sets`).
 - Labels: the version name is built from the addon's text, e.g. "2160p DV · 61.2 GB · Torrentio".
-- Probing: every stream is probed over HTTP in parallel (6 at a time) with Silo's own `ffprobe`
-  wrapper, so playback plans it like a scanned file; the viewer waits up to 12 seconds. A stream
-  whose probe fails (dead link, not media) is marked missing and never offered. Streams that need
-  request headers can't be probed yet.
+- Streams are not opened before playback: a debrid "resolve" link asks the service to fetch the
+  torrent, so opening every listed link would add torrents nobody picked. Listing versions skips
+  Silo's browse probe repair for streams (`addons.BrowseProbeEnsurer`); the stream that plays is
+  probed by the playback handler's own ensurer at playback start.
+- Ranking: streams the addon marks as ready on a debrid service ("[RD+]", "[RD⚡]", "⚡") come
+  first, unmarked next, and not-yet-downloaded or unavailable ones ("[RD download]", "⬇️", "⏳",
+  "❌") last; then resolution, addon order and the addon's own order.
 - Playback: the apps play original files with their own engine, so most streams go through
   `original_http`: the server proxies byte ranges from the URL (`playback/quillo_remote.go`); the
-  client only ever talks to Quillo. Remux hands the URL to ffmpeg. Nothing is transcoded by Quillo
-  itself. A link that fails mid-stream answers 502.
+  client only ever talks to Quillo. Every ffmpeg and ffprobe run (probe repair, seek anchors, HLS
+  remux and transcode, the copy-safety scan) gets the placeholder path rewritten by
+  `procgroup.RegisterArgRewriter` to a loopback URL,
+  `http://127.0.0.1:<PORT>/api/quillo/internal/stream/<token>/<hash>`, which this server proxies to
+  the real link. The token is random per process, the route answers loopback peers only, and the
+  real link (which can hold a debrid token) never reaches a command line, a log or an error.
+- A link that answers 4xx is hidden at once (`RegisterRemoteFailureReporter`), so the next play
+  picks another version and the next view asks the addons again. Turning an addon off or removing
+  it hides its streams.
+- Jellyfin-compatible API: its detail service gets the same `StreamFiles` and browse probe
+  wrapper, so Jellyfin clients (Infuse, Swiftfin, Streamyfin…) see addon streams as media sources
+  and direct-play them through the same proxy. Their search only finds addon titles already in the
+  Streaming library.
 - Local files and addon streams for the same title are versions of one item; Silo's normal
   version choice decides the default (currently by quality, so an addon 1080p can beat a local
   720p).
@@ -161,8 +175,9 @@ Edits to Silo's own files beyond the rebrand. Keep each one small.
 
 | `internal/playback/quillo_remote.go` (new) + `internal/playback/directplay.go`, `internal/playback/remux.go` | `RegisterRemoteSourceResolver`; direct play proxies a remote source, remux reads its URL |
 | `internal/api/handlers/playback_missing.go` | Playback preflight skips the on-disk check for remote sources (it would mark them missing) |
-| `internal/scanner/quillo_probe.go` (new) + `internal/scanner/probe.go`, `internal/scanner/pps.go` | `ApplyProbe`, `RegisterProbeURLResolver`; probes and the copy-safety scan read a remote file's URL |
-| `internal/api/router.go` | The addon service is created first; the detail service and playback handler get `StreamFiles` instead of the bare file repository |
+| `internal/procgroup/quillo_args.go` (new) + `internal/procgroup/procgroup.go` | `RegisterArgRewriter`; `CommandContext` rewrites placeholder path arguments for every ffmpeg/ffprobe run |
+| `internal/api/router.go` | The addon service (`addons.Shared`) is created first; the detail service and playback handler get `StreamFiles`, the detail service gets `BrowseProbeEnsurer`; the loopback stream route is registered |
+| `cmd/silo/main.go`, `cmd/silo/jellycompat_detail.go` | The Jellyfin-compatible detail service gets `StreamFiles` and `BrowseProbeEnsurer` |
 
 Known test failure on macOS, also on upstream: `internal/scanner`
 `TestExternalSubtitleDirCacheReadsSubtitleFolders` expects a case-sensitive filesystem.

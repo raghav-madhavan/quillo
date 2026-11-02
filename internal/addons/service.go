@@ -3,6 +3,7 @@ package addons
 import (
 	"context"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -10,6 +11,7 @@ import (
 	"github.com/Silo-Server/silo-server/internal/api/handlers"
 	"github.com/Silo-Server/silo-server/internal/catalog"
 	"github.com/Silo-Server/silo-server/internal/playback"
+	"github.com/Silo-Server/silo-server/internal/procgroup"
 	"github.com/Silo-Server/silo-server/internal/scanner"
 	"github.com/Silo-Server/silo-server/internal/sections"
 )
@@ -28,9 +30,24 @@ type Service struct {
 	enrichWake       chan struct{}
 	streamingLibrary int
 
-	files   *scanner.FileRepository
-	streams *streamSet
-	remote  *remoteSources
+	files         *scanner.FileRepository
+	streams       *streamSet
+	remote        *remoteSources
+	loopbackToken string
+}
+
+var shared struct {
+	once sync.Once
+	svc  *Service
+}
+
+// Shared returns the process's addon service, building it on first use. The
+// native API and the Jellyfin-compatible listener both use it, and its
+// registrations with Silo (row type, search, playback, process hooks) must
+// happen once.
+func Shared(db *pgxpool.Pool) *Service {
+	shared.once.Do(func() { shared.svc = NewService(db) })
+	return shared.svc
 }
 
 // NewService builds the service and registers the addon home-row type and
@@ -51,11 +68,10 @@ func NewService(db *pgxpool.Pool) *Service {
 	s.files = scanner.NewFileRepository(db)
 	s.streams = &streamSet{fresh: map[string]time.Time{}, inflight: map[string]chan struct{}{}}
 	s.remote = &remoteSources{s: s, cache: map[string]playback.RemoteSource{}}
+	s.loopbackToken = newLoopbackToken()
 	playback.RegisterRemoteSourceResolver(s.remote.resolve)
-	scanner.RegisterProbeURLResolver(func(ctx context.Context, filePath string) (string, bool) {
-		src, ok, err := s.remote.resolve(ctx, filePath)
-		return src.URL, ok && err == nil && len(src.Headers) == 0
-	})
+	playback.RegisterRemoteFailureReporter(s.streamFailed)
+	procgroup.RegisterArgRewriter(s.rewriteArg)
 	s.catalogs.onNewItems = s.nudgeEnrich
 	// Registered before any scan can run, so scans never touch it.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -121,6 +137,7 @@ func (s *Service) Install(ctx context.Context, owner *Owner, rawURL string) (*Ad
 	if err != nil {
 		return nil, err
 	}
+	s.addonStreamsChanged(ctx, a.ID, false)
 	if owner == nil {
 		if err := s.CreateRows(ctx, a); err != nil {
 			slog.WarnContext(ctx, "quillo addon rows: creating", "addon", a.Name, "error", err)
@@ -153,11 +170,33 @@ func (s *Service) SetEnabled(ctx context.Context, id int64, owner *Owner, enable
 	if !enabled {
 		s.catalogs.Forget(id)
 	}
+	s.addonStreamsChanged(ctx, id, !enabled)
 	return a, nil
+}
+
+// addonStreamsChanged runs after an addon was turned on or off or removed:
+// its streams stop being offered at once when hide is set, and every title
+// asks its addons again on its next view.
+func (s *Service) addonStreamsChanged(ctx context.Context, addonID int64, hide bool) {
+	if hide {
+		if _, err := s.store.db.Exec(ctx, `UPDATE media_files SET missing_since = now()
+			WHERE missing_since IS NULL AND file_path IN (SELECT file_path FROM quillo_streams WHERE addon_id = $1)`, addonID); err != nil {
+			slog.WarnContext(ctx, "quillo streams: hiding an addon's streams", "error", err)
+		}
+	}
+	if _, err := s.store.db.Exec(ctx, `DELETE FROM quillo_stream_sets`); err != nil {
+		slog.WarnContext(ctx, "quillo streams: forgetting stream lookups", "error", err)
+	}
+	if s.streams != nil {
+		s.streams.mu.Lock()
+		clear(s.streams.fresh)
+		s.streams.mu.Unlock()
+	}
 }
 
 // Remove uninstalls an addon and removes its home rows.
 func (s *Service) Remove(ctx context.Context, id int64, owner *Owner) error {
+	s.addonStreamsChanged(ctx, id, true)
 	if err := s.store.Delete(ctx, id, owner); err != nil {
 		return err
 	}

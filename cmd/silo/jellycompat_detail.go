@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Silo-Server/silo-server/internal/addons"
 	"github.com/Silo-Server/silo-server/internal/api"
 	"github.com/Silo-Server/silo-server/internal/catalog"
 	"github.com/Silo-Server/silo-server/internal/userstore"
@@ -22,7 +23,8 @@ func newCompatDetailService(
 	detailSvc := catalog.NewDetailService(itemRepo, episodeRepo, seasonRepo, personRepo, files)
 	detailSvc.SetFolderRepository(deps.FolderRepo)
 	detailSvc.SetGroupClaimRepository(catalog.NewGroupClaimRepository(deps.DB))
-	detailSvc.SetProbeEnsurer(deps.ProbeEnsurer)
+	// Quillo: listing versions must not open addon stream links (FORK_NOTES.md).
+	detailSvc.SetProbeEnsurer(addons.BrowseProbeEnsurer(deps.ProbeEnsurer))
 	detailSvc.SetChapterThumbnailQueuer(deps.ChapterThumbnailQueuer)
 	if deps.TrickplayReader != nil {
 		detailSvc.SetTrickplayAvailability(deps.TrickplayReader)

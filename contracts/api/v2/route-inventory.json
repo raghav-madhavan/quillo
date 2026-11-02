@@ -38,7 +38,7 @@
       "id": "api",
       "entrypoint": "internal/api.NewRouter",
       "description": "Main Silo API listener: the /api/v1 namespace and the routes mounted beside it.",
-      "route_count": 712
+      "route_count": 714
     },
     {
       "id": "api_v2",
@@ -60,8 +60,8 @@
     }
   ],
   "totals": {
-    "routes": 897,
-    "conditional_routes": 700,
+    "routes": 899,
+    "conditional_routes": 702,
     "streaming_routes": 45,
     "websocket_routes": 4
   },
@@ -4008,6 +4008,60 @@
         "acting_admin",
         "authenticated"
       ],
+      "conditions": [
+        "quilloAddons != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "GET",
+      "path": "/api/quillo/internal/stream/{token}/{hash}",
+      "route_group": "/",
+      "handler": "(*internal/addons.Handler).InternalStream",
+      "handler_expr": "addonHandler.InternalStream",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 1,
+      "auth_class": "public",
+      "auth_traits": [],
+      "conditions": [
+        "quilloAddons != nil && authMiddleware != nil"
+      ],
+      "conditional": true,
+      "request_kind": "unknown",
+      "response_media_kind": "unknown",
+      "delegates_to": "",
+      "streams": false,
+      "upgrades_websocket": false,
+      "method_origin": "explicit",
+      "success_statuses": null,
+      "error_codes": null,
+      "source_file": "internal/api/router.go"
+    },
+    {
+      "listener": "api",
+      "namespace": "legacy_unversioned",
+      "method": "HEAD",
+      "path": "/api/quillo/internal/stream/{token}/{hash}",
+      "route_group": "/",
+      "handler": "(*internal/addons.Handler).InternalStream",
+      "handler_expr": "addonHandler.InternalStream",
+      "handler_kind": "method",
+      "handler_resolved": true,
+      "middleware_chain": 1,
+      "auth_class": "public",
+      "auth_traits": [],
       "conditions": [
         "quilloAddons != nil && authMiddleware != nil"
       ],
