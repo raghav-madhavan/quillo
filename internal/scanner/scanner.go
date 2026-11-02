@@ -317,6 +317,9 @@ func (s *Scanner) SetEbookEnrichmentQueue(queue EbookEnrichmentQueue) {
 // libraries by ScanPodcastFolder; both bypass the per-file movie/TV
 // pipeline entirely.
 func (s *Scanner) ScanFolder(ctx context.Context, folder *models.MediaFolder) (*ScanResult, error) {
+	if catalog.IsVirtualLibrary(folder.ID) { // Quillo: virtual libraries have nothing to scan
+		return &ScanResult{}, nil
+	}
 	watchCtx, stopWatch := s.watchFolderContext(ctx, folder.ID)
 	defer stopWatch()
 
@@ -364,6 +367,9 @@ func (s *Scanner) ScanFolder(ctx context.Context, folder *models.MediaFolder) (*
 // ScanSubtree walks a single subtree within a media folder and reconciles only
 // files that live beneath that subtree.
 func (s *Scanner) ScanSubtree(ctx context.Context, folder *models.MediaFolder, subtreePath string) (*ScanResult, error) {
+	if catalog.IsVirtualLibrary(folder.ID) { // Quillo: virtual libraries have nothing to scan
+		return &ScanResult{}, nil
+	}
 	cleanSubtree := filepath.Clean(subtreePath)
 	// A subtree scan under a skipped library root would walk nothing and
 	// retire the subtree piece by piece, bypassing the empty-root guard. Only
@@ -2684,6 +2690,9 @@ func pathWithinAnyRoot(path string, roots []string) bool {
 
 // ScanFile scans a single file and upserts it into the database.
 func (s *Scanner) ScanFile(ctx context.Context, filePath string, folder *models.MediaFolder) error {
+	if catalog.IsVirtualLibrary(folder.ID) { // Quillo: virtual libraries have nothing to scan
+		return nil
+	}
 	var stopWatch context.CancelFunc
 	ctx, stopWatch = s.watchFolderContext(ctx, folder.ID)
 	defer stopWatch()

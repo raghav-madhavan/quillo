@@ -210,10 +210,10 @@ func (s *Service) searchAddons(ctx context.Context, q string, types []string) []
 		slog.WarnContext(ctx, "quillo addon search: saving titles", "error", err)
 		return nil
 	}
+	s.nudgeEnrich()
 	ids := make([]string, 0, len(items))
 	for _, it := range items {
 		ids = append(ids, it.ContentID)
 	}
 	return ids
 }
-

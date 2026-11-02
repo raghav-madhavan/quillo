@@ -3,6 +3,7 @@ package addons
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -20,6 +21,10 @@ type Service struct {
 	catalogs *CatalogCache
 	items    *catalog.ItemRepository
 	search   *searchCache
+
+	refresher        ItemRefresher
+	enrichWake       chan struct{}
+	streamingLibrary int
 }
 
 // NewService builds the service and registers the addon home-row type and
@@ -34,6 +39,17 @@ func NewService(db *pgxpool.Pool) *Service {
 		catalogs: NewCatalogCache(client, mat),
 		items:    catalog.NewItemRepository(db),
 		search:   &searchCache{entries: map[string]searchHit{}},
+
+		enrichWake: make(chan struct{}, 1),
+	}
+	s.catalogs.onNewItems = s.nudgeEnrich
+	// Registered before any scan can run, so scans never touch it.
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if id, err := s.ensureStreamingLibrary(ctx); err != nil {
+		slog.Error("quillo: Streaming library unavailable; addon series won't list episodes", "error", err)
+	} else {
+		s.streamingLibrary = id
 	}
 	sections.RegisterExternalSection(SectionType, s.fetchRow)
 	handlers.RegisterSearchMerge(s.StartSearch)
@@ -43,9 +59,11 @@ func NewService(db *pgxpool.Pool) *Service {
 func (s *Service) Store() *Store { return s.store }
 
 // Start runs the one-time and background work: the starter preset, home rows
-// for addons that don't have them yet, and catalog prewarming. It returns
-// when ctx ends.
+// for addons that don't have them yet, catalog prewarming and metadata
+// enrichment. It returns when ctx ends.
 func (s *Service) Start(ctx context.Context) {
+	go s.runEnrichment(ctx)
+	go s.runSweep(ctx)
 	s.EnsureStarter(ctx)
 	s.syncRows(ctx)
 	s.Prewarm(ctx)

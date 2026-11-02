@@ -90,8 +90,30 @@ Admin API (`/api/quillo/admin`, login + acting-admin required, outside Silo's `/
 - Viewers whose access is limited to certain libraries don't see addon titles (they belong to no
   library); maturity limits apply as for any item.
 
-Not done yet: series seasons and episodes (Phase 4), cleanup of Quillo-made items nobody has used
-for a while, and per-profile addons.
+## Phase 4a: native metadata for addon titles
+
+- Enrichment (`internal/addons/enrich.go`): a background worker (two at a time, most recently
+  shown first) runs Silo's own `MetadataService.RefreshItem` on each Quillo-made item. Silo's
+  TMDB/TVDB providers fill in cast and crew with photos, ratings, content ratings, trailers,
+  studios, collections, and a series' seasons and episodes, as for a scanned file. Titles no
+  provider knows keep their addon metadata; failures retry up to three times, hours apart.
+- Streaming library (`internal/addons/streaming.go`): Silo lists seasons and episodes, and tracks
+  Continue Watching and Next Up, only for titles in a library. Quillo creates one `mixed` library
+  named "Streaming" (id in `quillo_meta.streaming_library_id`) with no folders, and adds each
+  enriched title and its episodes to it. `catalog.RegisterVirtualLibrary` marks it so scans and
+  membership reconciliation never touch it (they would otherwise drop every membership, since
+  none has a file, and purge the items as orphans).
+- Recently Added: addon titles and their Streaming memberships are dated 2000-01-01, so Recently
+  Added rows list real library titles first.
+- Artwork: addon titles keep provider links (TMDB/TVDB/metahub) instead of copies on disk. Silo's
+  image-cache job queue is wrapped (`addons.HotlinkAddonArtwork`) to drop jobs for Quillo-made
+  titles without a local file; a 10-minute sweep switches any stored copy back to its provider
+  source, and Silo's hourly artwork cleanup deletes the displaced copies. Cast photos and local
+  library artwork are cached as Silo normally does.
+
+Not done yet: cleanup of Quillo-made items nobody has used for a while, handing an addon title
+over to Silo when a local file for it appears (it stays dated 2000 and in Streaming), and
+per-profile addons.
 
 ## Core touchpoints
 
@@ -107,3 +129,10 @@ Edits to Silo's own files beyond the rebrand. Keep each one small.
 | `web/src/lib/documentTitle.ts` | "Admin Addons" title |
 | `internal/sections/quillo_external.go` (new) + `internal/sections/fetcher.go` | `RegisterExternalSection`; `FetchOne` hands registered section types to their fetch function |
 | `internal/api/handlers/quillo_search.go` (new) + `internal/api/handlers/catalog_items_service.go` | `RegisterSearchMerge`; `CatalogHandler.Browse` starts the merge before resolving and merges after |
+| `internal/catalog/quillo_virtual.go` (new) + `internal/catalog/library_repo.go`, `internal/catalog/episode_library_repo.go` | `RegisterVirtualLibrary`; membership reconciliation returns early for a virtual library |
+| `internal/scanner/scanner.go` | `ScanFolder`, `ScanSubtree` and `ScanFile` return early for a virtual library |
+| `cmd/silo/main.go` | The metadata service's image-cache job queue is wrapped by `addons.HotlinkAddonArtwork` |
+| `internal/api/router.go` | Passes the metadata service to the addon service as its `ItemRefresher` |
+
+Known test failure on macOS, also on upstream: `internal/scanner`
+`TestExternalSubtitleDirCacheReadsSubtitleFolders` expects a case-sensitive filesystem.

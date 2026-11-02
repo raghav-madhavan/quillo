@@ -40,6 +40,7 @@ import (
 
 	"github.com/Silo-Server/silo-server/internal/access"
 	"github.com/Silo-Server/silo-server/internal/activitylog"
+	"github.com/Silo-Server/silo-server/internal/addons"
 	"github.com/Silo-Server/silo-server/internal/adminjob"
 	"github.com/Silo-Server/silo-server/internal/animeids"
 	"github.com/Silo-Server/silo-server/internal/api"
@@ -2286,7 +2287,8 @@ func main() {
 			metadataService.SetImageCacher(imageCacher)
 			imageCacheJobs := metadata.NewImageCacheJobRepository(deps.DB)
 			deps.ArtworkRepair = imageCacheJobs
-			metadataService.SetImageCacheJobEnqueuer(imageCacheJobs)
+			// Quillo: addon titles keep provider artwork links (FORK_NOTES.md).
+			metadataService.SetImageCacheJobEnqueuer(addons.HotlinkAddonArtwork(deps.DB, imageCacheJobs))
 			metadataImageCacheProcessor = metadata.NewImageCacheProcessorWithTargets(
 				imageCacheJobs,
 				imageCacher,

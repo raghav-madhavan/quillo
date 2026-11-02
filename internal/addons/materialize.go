@@ -207,8 +207,8 @@ func (m *Materializer) upsertOnce(ctx context.Context, rs []*resolvedMeta) error
 		batch.Queue(`
 			WITH ins AS (
 				INSERT INTO media_items (content_id, type, title, year, overview, genres, runtime,
-					imdb_id, tmdb_id, tvdb_id, rating_imdb, poster_path, backdrop_path, logo_path, show_status, status)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'matched')
+					imdb_id, tmdb_id, tvdb_id, rating_imdb, poster_path, backdrop_path, logo_path, show_status, status, created_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'matched', $18)
 				ON CONFLICT (content_id) DO NOTHING
 				RETURNING content_id
 			)
@@ -216,7 +216,7 @@ func (m *Materializer) upsertOnce(ctx context.Context, rs []*resolvedMeta) error
 			SELECT content_id, $16, $17 FROM ins`,
 			r.contentID, r.itemType, meta.Name, meta.YearInt(), meta.Description, genres, meta.RuntimeMinutes(),
 			r.ids.Imdb, r.ids.Tmdb, r.ids.Tvdb, meta.Rating(), posterURL(meta.Poster), meta.Background, meta.Logo,
-			meta.Status, meta.ID, meta.Type)
+			meta.Status, meta.ID, meta.Type, streamingJoinedAt)
 		for provider, id := range map[string]string{"imdb": r.ids.Imdb, "tmdb": r.ids.Tmdb, "tvdb": r.ids.Tvdb} {
 			if id == "" {
 				continue

@@ -502,6 +502,9 @@ func (r *LibraryItemRepository) ReconcileRelinkedItems(ctx context.Context, fold
 // transaction back, and a rerun recomputes from the current rows, so a
 // deadlock is retried rather than failing the scan.
 func (r *LibraryItemRepository) reconcileMemberships(ctx context.Context, folderID int, contentIDs, protectedPathPrefixes []string, onlyFileless bool) (int, int, []string, error) {
+	if IsVirtualLibrary(folderID) { // Quillo: quillo_virtual.go
+		return 0, 0, nil, nil
+	}
 	var (
 		removed, deleted int
 		imageDirs        []string

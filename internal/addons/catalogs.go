@@ -35,6 +35,8 @@ type CatalogCache struct {
 	client *Client
 	mat    *Materializer
 	now    func() time.Time
+	// onNewItems runs after a page was saved, to wake enrichment.
+	onNewItems func()
 
 	mu       sync.Mutex
 	entries  map[catalogKey]catalogEntry
@@ -111,6 +113,9 @@ func (c *CatalogCache) refresh(ctx context.Context, key catalogKey, a *Addon, ex
 	items, err := c.mat.Items(ctx, metas)
 	if err != nil {
 		return nil, err
+	}
+	if c.onNewItems != nil {
+		c.onNewItems()
 	}
 	ids := make([]string, 0, len(items))
 	for _, it := range items {

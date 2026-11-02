@@ -51,6 +51,9 @@ func (r *EpisodeLibraryRepository) RemoveStaleEpisodeMemberships(ctx context.Con
 // transaction back, and a rerun recomputes membership from the current rows,
 // so a deadlock is retried rather than failing the scan.
 func (r *EpisodeLibraryRepository) reconcileFolderMembership(ctx context.Context, folderID int, episodeIDs []string, restore bool) (int, error) {
+	if IsVirtualLibrary(folderID) { // Quillo: quillo_virtual.go
+		return 0, nil
+	}
 	var removed int
 	err := retryOnDeadlock(ctx, func() error {
 		var err error

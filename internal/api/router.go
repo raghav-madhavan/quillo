@@ -3205,6 +3205,9 @@ func newChiRouter(deps Dependencies) chi.Router {
 	// Quillo: addon manager API, outside Silo's /api/v2 contract (FORK_NOTES.md).
 	if deps.DB != nil && authMiddleware != nil {
 		addonService := addons.NewService(deps.DB)
+		if refresher, ok := deps.MetadataService.(addons.ItemRefresher); ok {
+			addonService.SetRefresher(refresher)
+		}
 		go addonService.Start(context.Background())
 		addonHandler := addons.NewHandler(addonService)
 		r.Route("/api/quillo/admin", func(r chi.Router) {
