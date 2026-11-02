@@ -111,7 +111,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, userErrorf("Nothing to change."))
 		return
 	}
-	a, err := h.svc.store.SetEnabled(r.Context(), id, nil, *body.Enabled)
+	a, err := h.svc.SetEnabled(r.Context(), id, nil, *body.Enabled)
 	if err != nil {
 		writeError(w, r, err)
 		return
@@ -160,7 +160,7 @@ func (h *Handler) Remove(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := h.svc.store.Delete(r.Context(), id, nil); err != nil {
+	if err := h.svc.Remove(r.Context(), id, nil); err != nil {
 		writeError(w, r, err)
 		return
 	}

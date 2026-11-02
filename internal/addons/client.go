@@ -81,7 +81,7 @@ func fetchError(err error) *UserError {
 	var netErr net.Error
 	switch {
 	case errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &netErr) && netErr.Timeout()):
-		return userErrorf("This addon isn't responding. It took longer than %d seconds.", int(manifestTimeout.Seconds()))
+		return userErrorf("This addon isn't responding.")
 	case errors.As(err, &dnsErr):
 		return userErrorf("Couldn't find the addon's server (%s). Check the link for typos.", dnsErr.Name)
 	default:

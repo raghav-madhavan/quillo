@@ -87,9 +87,15 @@ func (h *CatalogHandler) Browse(ctx context.Context, v ItemViewer, req catalog.C
 	if groupedByWork || boxSets != nil {
 		return h.browseGrouped(ctx, v, req, boxSets)
 	}
+	merge := startSearchMerge(ctx, req, v.Access) // Quillo: quillo_search.go
 	result, err := h.resolver.Resolve(ctx, req, v.Access)
 	if err != nil {
 		return CatalogBrowseView{}, catalogResolveError(ctx, err, false)
+	}
+	if merge != nil {
+		before := len(result.Items)
+		result.Items = merge(result.Items)
+		result.Total += len(result.Items) - before
 	}
 	items := h.catalogItemResponses(ctx, v, result.Items, catalogSortMetricField(req, result), playableTargetLibraryIDs(req), v.Access)
 	return catalogBrowseView(result, items), nil

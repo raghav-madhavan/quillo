@@ -67,6 +67,32 @@ Admin API (`/api/quillo/admin`, login + acting-admin required, outside Silo's `/
 `PATCH/DELETE /addons/{id}`, `POST /addons/{id}/refresh`. Errors use Silo's
 `{"error", "message"}` envelope with a plain-English message.
 
+## Phase 3: addon catalogs and search
+
+- Home rows: installing a server-wide addon adds one home row per catalog that lists without an
+  extra (Cinemeta: Popular and Featured, for movies and series), right after Continue Watching.
+  Rows are ordinary `page_sections` rows of type `quillo_addon_catalog`
+  (`{"addon","type","catalog"}`), so admins rename, move or hide them in Home Sections. They are
+  created once per addon (`quillo_addons.home_rows_created`); removing the addon removes them.
+- Catalog pages are fetched on demand and kept in memory (`internal/addons/catalogs.go`): fresh for
+  20 minutes, then shown stale while a background refresh runs. A prewarm loop reloads every
+  enabled addon's home-row catalogs every 15 minutes, so the home screen doesn't wait on addons.
+- Titles become lightweight `media_items` rows (`internal/addons/materialize.go`) keyed by Silo's
+  own deterministic content ids (TMDB/TVDB first, IMDb fallback). A title already in the catalog,
+  found through `media_item_provider_ids`, is reused, so local files and addon results are one
+  item. New items belong to no library, so library pages, Recently Added and the other library
+  rows never list them. Posters are hotlinked (`https://` artwork paths pass through Silo's image
+  resolution unchanged). `quillo_items` marks the items Quillo made.
+- Search: the first page of a catalog text search also asks every enabled addon's searchable
+  catalogs, in parallel, for at most 3.5 seconds, started before Silo's own search runs. Addon
+  titles follow the local results, deduplicated, closest title matches first. Results are cached
+  for 10 minutes.
+- Viewers whose access is limited to certain libraries don't see addon titles (they belong to no
+  library); maturity limits apply as for any item.
+
+Not done yet: series seasons and episodes (Phase 4), cleanup of Quillo-made items nobody has used
+for a while, and per-profile addons.
+
 ## Core touchpoints
 
 Edits to Silo's own files beyond the rebrand. Keep each one small.
@@ -74,8 +100,10 @@ Edits to Silo's own files beyond the rebrand. Keep each one small.
 | File | Change |
 |---|---|
 | `internal/database/migration_command.go` | `MigrateOnly` runs `addons.Migrate` after Silo's migrations |
-| `internal/api/router.go` | Registers the `/api/quillo/admin` routes behind `RequireAuth` + `requireActingAdmin`, and starts the one-time starter preset |
+| `internal/api/router.go` | Registers the `/api/quillo/admin` routes behind `RequireAuth` + `requireActingAdmin`, and starts the addon service (starter preset, home rows, prewarm) |
 | `contracts/api/v2/route-inventory.json` | Regenerated to list the Quillo routes |
 | `web/src/App.tsx` | `/admin/addons` route |
 | `web/src/lib/adminNavigation.ts` | Addons entry in Admin › Manage |
 | `web/src/lib/documentTitle.ts` | "Admin Addons" title |
+| `internal/sections/quillo_external.go` (new) + `internal/sections/fetcher.go` | `RegisterExternalSection`; `FetchOne` hands registered section types to their fetch function |
+| `internal/api/handlers/quillo_search.go` (new) + `internal/api/handlers/catalog_items_service.go` | `RegisterSearchMerge`; `CatalogHandler.Browse` starts the merge before resolving and merges after |

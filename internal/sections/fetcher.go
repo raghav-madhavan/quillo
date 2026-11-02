@@ -355,6 +355,12 @@ func (f *Fetcher) FetchOne(ctx context.Context, resolved ResolvedSection, librar
 		f.logSlowSectionFetch(resolved, libraryID, libraryIDs, result, time.Since(start), err)
 	}()
 
+	// Quillo: externally sourced rows (quillo_external.go).
+	if fetch, ok := externalSection(resolved.SectionType); ok {
+		result, err = fetch(ctx, resolved, userID, profileID, filter)
+		return result, err
+	}
+
 	if f.RecommendationReader != nil {
 		switch resolved.SectionType {
 		case SectionBecauseYouWatched:
