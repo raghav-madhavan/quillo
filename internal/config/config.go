@@ -643,7 +643,7 @@ func setDefaults() *configRaw {
 			PublicURL:             "http://127.0.0.1:8097",
 			EmulatedServerVersion: DefaultJellyfinCompatEmulatedServerVersion,
 			ServerID:              defaultJellyfinCompatServerID,
-			ServerName:            "Silo",
+			ServerName:            "Quillo",
 			WebEnabled:            true,
 			WebVersion:            DefaultJellyfinWebVersion,
 			WebDir:                DefaultJellyfinWebDir,

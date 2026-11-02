@@ -176,7 +176,7 @@ func (s *SMTPSender) loadConfig(ctx context.Context) (*smtpConfig, error) {
 		return nil, fmt.Errorf("invalid email.smtp_security %q", cfg.security)
 	}
 	if cfg.fromName == "" {
-		cfg.fromName = "Silo"
+		cfg.fromName = "Quillo"
 	}
 	return cfg, nil
 }

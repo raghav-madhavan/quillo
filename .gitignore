@@ -91,3 +91,5 @@ docker-compose.local.yml
 output/
 /settingsgen
 /playbackfixtures
+/quillo
+.quillo-dev/
